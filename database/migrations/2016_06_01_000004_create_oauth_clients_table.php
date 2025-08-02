@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('oauth_clients', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('user_id')->nullable()->index();
             $table->string('name');
-            $table->string('username')->unique();
-            $table->enum('role', ['superadmin', 'admin', 'user'])->default('user');
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->unsignedBigInteger('major_id')->nullable();
-            $table->rememberToken();
+            $table->string('secret', 100)->nullable();
+            $table->string('provider')->nullable();
+            $table->text('redirect');
+            $table->boolean('personal_access_client');
+            $table->boolean('password_client');
+            $table->boolean('revoked');
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('oauth_clients');
     }
 };
