@@ -12,6 +12,27 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        if ($request->expectsJson()) {
+            abort(401, 'Unauthenticated. Please login first.');
+        }
+        return route('login');
+    }
+
+    /**
+     * Handle an unauthenticated user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  array  $guards
+     * @return void
+     *
+     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     */
+    protected function unauthenticated($request, array $guards)
+    {
+        abort(response()->json([
+            'status' => '403',
+            'error' => 'Forbidden',
+            'message' => 'You do not have permission to access this resource.'
+        ], 401));
     }
 }

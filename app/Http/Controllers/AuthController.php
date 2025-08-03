@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
@@ -12,50 +14,76 @@ class AuthController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $userId = Auth::id();
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => $user->username,
-                'role' => $user->role,
-            ],
-        ], 200);
+                'user_id' => $userId,
+                'name' => Auth::user()->name,
+                'username' => Auth::user()->username,
+                'role' => Auth::user()->role,
+            ]
+        ]);
+    }
+
+    public function getLimiterKey(Request $request) {
+        return RateLimiter::availableIn($request->ip());
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->only('username', 'password');
+        $credentials = $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            // Gunakan method Passport untuk membuat token
-            $token = $user->createToken('wikventory')->accessToken;
+        $limiterKey = $this->getLimiterKey($request);
 
+        if (RateLimiter::tooManyAttempts($limiterKey, 3)) {
+            $retryAfter = RateLimiter::availableIn($limiterKey);
             return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'username' => $user->username,
-                    'role' => $user->role,
-                ],
-                'token' => $token,
-            ], 200);
+                'status' => 429,
+                'message' => "Too many attempts. Try again in $retryAfter seconds.",
+            ], 429);
         }
 
-        return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        RateLimiter::hit($limiterKey, 60);
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Invalid credentials.',
+            ], 401);
+        }
+
+        $user = Auth::user();
+
+        User::whereId(Auth::id());
+        // Clear rate limiter on successful login
+        RateLimiter::clear($limiterKey);
+
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'usid' => $user->id,
+                'name' => $user->name,
+                'username' => $user->username,
+                'role' => $user->role,
+            ],
+            'token' => $user->createToken('wikventory')->accessToken,
+        ], 200);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $user = Auth::user();
-        // Untuk Passport, gunakan method ini
-        $user->token()->revoke();
-
-        return response()->json(['status' => 'success', 'message' => 'Logged out successfully'], 200);
+        Auth::user()->token()->delete();
+        Auth::guard('web')->logout();
+        User::whereId(Auth::id());
+        return response()->json([
+            'status' => 'success',
+            'message' => "berhasil logout"
+        ]);
     }
 
     /**

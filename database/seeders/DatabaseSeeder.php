@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         Major::create([
             'name' => 'PPLG',
+            'color' => '#FF5733',
         ]);
 
         User::create([

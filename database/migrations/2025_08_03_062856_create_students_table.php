@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('majors', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->string('icon')->nullable();
-            $table->string('color');
+        Schema::create('students', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->integer('nis')->unique();
+            $table->string('rombel');
+            $table->string('rayon');
+            $table->unsignedBigInteger('major_id')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('majors');
+        Schema::dropIfExists('students');
     }
 };
