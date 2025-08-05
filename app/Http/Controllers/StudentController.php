@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\student\StoreValidate;
+use App\Http\Requests\student\UpdateValidate;
 use App\Models\Student;
 use App\Services\StudentService;
 use Illuminate\Http\Request;
@@ -32,20 +34,14 @@ class StudentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreValidate $request)
     {
-        $data = $request->validate([
-            'name' => 'required',
-            'nis' => 'required|unique:students,nis',
-            'rombel' => 'required',
-            'rayon' => 'required',
-            'major_id' => 'required',
-        ]);
+        $data = $request->validated();
 
         DB::beginTransaction();
         try {
             $newData = $this->studentService->createStudent($data);
-            
+
             DB::commit();
             return response()->json([
                 'status' => 'success',
@@ -66,7 +62,7 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $studentData = $this->studentService->getStudentById($student);
-        
+
         return response()->json([
             'status' => 'success',
             'data' => $studentData,
@@ -76,20 +72,14 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Student $student)
+    public function update(UpdateValidate $request, Student $student)
     {
-        $data = $request->validate([
-            'name' => 'required',
-            'nis' => 'required|unique:students,nis,' . $student->id,
-            'rombel' => 'required',
-            'rayon' => 'required',
-            'major_id' => 'required',
-        ]);
+        $data = $request->validated();
 
         DB::beginTransaction();
         try {
             $updatedStudent = $this->studentService->updateStudent($student, $data);
-            
+
             DB::commit();
             return response()->json([
                 'status' => 'success',
@@ -116,9 +106,9 @@ class StudentController extends Controller
                     'message' => 'data not found'
                 ], 404);
             }
-            
+
             $this->studentService->deleteStudent($student);
-            
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'data deleted successfully'
