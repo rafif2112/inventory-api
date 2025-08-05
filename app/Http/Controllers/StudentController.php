@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\student\StoreValidate;
-use App\Http\Requests\student\UpdateValidate;
+use App\Http\Requests\Student\StoreValidate;
+use App\Http\Requests\Student\UpdateValidate;
 use App\Models\Student;
 use App\Services\StudentService;
 use Illuminate\Http\Request;
