@@ -44,9 +44,9 @@ class StudentController extends Controller
 
             DB::commit();
             return response()->json([
-                'status' => 'success',
+                'status' => 201,
                 'data' => $newData,
-            ]);
+            ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
