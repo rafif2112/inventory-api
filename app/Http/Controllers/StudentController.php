@@ -3,24 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use App\Services\StudentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $studentService;
+
+    public function __construct(StudentService $studentService)
     {
-        //
+        $this->studentService = $studentService;
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(Request $request)
     {
-        //
+        $data = $this->studentService->getAllStudents();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -28,7 +34,30 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required',
+            'nis' => 'required|unique:students,nis',
+            'rombel' => 'required',
+            'rayon' => 'required',
+            'major_id' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $newData = $this->studentService->createStudent($data);
+            
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'data' => $newData,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to create new data'
+            ]);
+        }
     }
 
     /**
@@ -36,15 +65,12 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Student $student)
-    {
-        //
+        $studentData = $this->studentService->getStudentById($student);
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $studentData,
+        ]);
     }
 
     /**
@@ -52,7 +78,30 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required',
+            'nis' => 'required|unique:students,nis,' . $student->id,
+            'rombel' => 'required',
+            'rayon' => 'required',
+            'major_id' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $updatedStudent = $this->studentService->updateStudent($student, $data);
+            
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'data' => $updatedStudent,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to update data'
+            ]);
+        }
     }
 
     /**
@@ -60,6 +109,25 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        //
+        try {
+            if (!$student) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'data not found'
+                ], 404);
+            }
+            
+            $this->studentService->deleteStudent($student);
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'data deleted successfully'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to delete data'
+            ]);
+        }
     }
 }
