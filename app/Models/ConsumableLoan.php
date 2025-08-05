@@ -16,6 +16,7 @@ class ConsumableLoan extends Model
         'consumable_item_id',
         'quantity',
         'purpose',
+        'borrowed_by',
         'borrowed_at',
     ];
 
