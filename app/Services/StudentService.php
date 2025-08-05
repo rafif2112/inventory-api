@@ -51,7 +51,7 @@ class StudentService
     public function updateStudent(Student $student, array $data)
     {
         try {
-            $student->update([
+            $student->whereId($student->id)->update([
                 'name' => $data['name'],
                 'nis' => $data['nis'],
                 'rombel' => $data['rombel'],
