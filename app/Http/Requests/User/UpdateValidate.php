@@ -24,12 +24,12 @@ class UpdateValidate extends FormRequest
         // $userId = $this->route('user')->id;
 
         return [
-            // 'name' => 'required',
-            // 'username' => 'required',
-            // 'role' => 'required|in:superadmin,admin,user',
-            // 'email_verified_at' => 'required',
-            // 'password' => 'required',
-            // 'major_id' => 'required',
+            'name' => 'nullable|string|max:255',
+            'username' => 'nullable|string|max:255',
+            'role' => 'nullable|in:superadmin,admin,user',
+            // 'email_verified_at' => 'nullable',
+            'password' => 'nullable',
+            'major_id' => 'nullable',
         ];
     }
 }

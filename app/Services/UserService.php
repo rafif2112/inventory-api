@@ -20,9 +20,8 @@ class UserService
                 'name' => $data['name'],
                 'username' => $data['username'],
                 'role' => $data['role'],
-                'email_verified_at' => $data['email_verified_at'],
                 'password' => Hash::make($data['password']),
-                'major_id' => $data['major_id'],
+                'major_id' => $data['major_id'] ?? null,
             ]);
 
             return $newUser;
@@ -42,12 +41,11 @@ class UserService
     {
         try {
             $user = User::create([
-                'name' => $data['name'],
-                'username' => $data['username'],
-                'role' => $data['role'],
-                'email_verified_at' => $data['email_verified_at'],
-                'password' => $data['password'],
-                'major_id' => $data['major_id'],
+                'name' => $data['name'] ?? $user->name,
+                'username' => $data['username'] ?? $user->username,
+                'role' => $data['role'] ?? $user->role,
+                'password' => $data['password'] ?? $user->password,
+                'major_id' => $data['major_id'] ?? $user->major_id,
             ]);
 
             return $user;

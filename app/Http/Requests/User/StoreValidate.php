@@ -25,9 +25,9 @@ class StoreValidate extends FormRequest
             'name' => 'required',
             'username' => 'required',
             'role' => 'required|in:superadmin,admin,user',
-            'email_verified_at' => 'required',
+            // 'email_verified_at' => 'required',
             'password' => 'required',
-            'major_id' => 'required',
+            'major_id' => 'nullable|exists:majors,id',
         ];
     }
 }
