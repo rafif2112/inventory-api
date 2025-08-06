@@ -77,6 +77,7 @@ class ItemController extends Controller
         try {
             $item->whereId($item->id)->update($validatedData);
 
+            dd($item);
             DB::commit();
             return response()->json([
                 'status' => 200,

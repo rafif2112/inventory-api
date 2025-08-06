@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\SubItem\StoreValidate;
+use App\Http\Requests\SubItem\UpdateValidate;
+use App\Models\SubItem;
 
 class SubItemController extends Controller
 {
@@ -12,23 +15,41 @@ class SubItemController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $data = SubItem::select('*')
+            ->latest()  
+            ->get();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'status' => 200,
+            'data' => $data,
+        ], 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreValidate $request)
     {
-        //
+        $validated = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            
+            $subItem = SubItem::create($validated);
+
+            DB::commit();
+            return response()->json([
+                'status' => 201,
+                'message' => 'Sub item created successfully',
+            ], 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create sub item',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -40,19 +61,30 @@ class SubItemController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SubItem $subItem)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SubItem $subItem)
+    public function update(UpdateValidate $request, SubItem $subItem)
     {
-        //
+        $validated = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $subItem->update($validated);
+
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Sub item updated successfully',
+                'data' => $subItem,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update sub item',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -60,6 +92,30 @@ class SubItemController extends Controller
      */
     public function destroy(SubItem $subItem)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            if(!$subItem) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Sub item not found',
+                ], 404);
+            }
+
+            $subItem->whereId($subItem->id)->delete();
+
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Sub item deleted successfully',
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to delete sub item',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

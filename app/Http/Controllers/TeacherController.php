@@ -3,17 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Models\Teacher;
+use App\Services\TeacherService;
 use Illuminate\Http\Request;
 
 class TeacherController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $teacherService;
+
+    public function __construct(TeacherService $teacherService)
     {
-        //
+        $this->teacherService = $teacherService;
     }
+
+    public function index(Request $request)
+    {
+        $search = $request->search;
+
+        if ($search) {
+            $data = $this->teacherService->searchTeachers($search);
+        } else {
+            $data = $this->teacherService->getAllTeachers();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+        ]);
+    }
+
+    // public function index(Request $request)
+    // {
+    //     $search = $request->search;
+    //     $data = $this->teacherService->searchTeachers($search);
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $data,
+    //     ]);
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -34,9 +61,14 @@ class TeacherController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Teacher $teacher)
+    public function show($id)
     {
-        //
+        $teacherData = $this->teacherService->getTeacherById($id);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $teacherData,
+        ]);
     }
 
     /**
