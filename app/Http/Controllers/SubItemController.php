@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\SubItem\StoreValidate;
+use App\Http\Requests\SubItem\UpdateValidate;
+use App\Models\SubItem;
 
 class SubItemController extends Controller
 {
@@ -26,15 +28,9 @@ class SubItemController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreValidate $request)
     {
-        $validated = $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'merk' => 'required|string|max:255',
-            'stock' => 'required|numeric',
-            'unit' => 'required|string|max:50',
-            'major_id' => 'required|exists:majors,id',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
         try {
@@ -67,15 +63,9 @@ class SubItemController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SubItem $subItem)
+    public function update(UpdateValidate $request, SubItem $subItem)
     {
-        $validated = $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'merk' => 'required|string|max:255',
-            'stock' => 'required|numeric',
-            'unit' => 'required|string|max:50',
-            'major_id' => 'required|exists:majors,id',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
         try {
