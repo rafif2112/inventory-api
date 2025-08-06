@@ -47,6 +47,7 @@ Route::middleware('auth:api')->group(function () {
     // });
 
     Route::apiResource('/teacher', TeacherController::class)->only('index', 'show');
+
     Route::apiResource('/unit-items', UnitItemController::class);
 });
 
