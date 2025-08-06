@@ -61,12 +61,12 @@ class MajorController extends Controller
                 'status' => 201,
                 'message' => 'Major created successfully',
             ], 201);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
-                'status' => 500,
-                'message' => 'Failed to create major',
-                'error' => $e->getMessage(),
+            'status' => 500,
+            'message' => 'Failed to create major',
+            'error' => $e->getMessage(),
             ], 500);
         }
     }
