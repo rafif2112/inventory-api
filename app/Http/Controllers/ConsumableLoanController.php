@@ -2,74 +2,33 @@
 
 namespace App\Http\Controllers;
 
-// use App\Http\Requests\ConsumableLoan\StoreValidate;
-// use App\Http\Requests\ConsumableLoan\UpdateValidate;
+use App\Http\Requests\ConsumableLoan\StoreValidate;
+use App\Http\Requests\ConsumableLoan\UpdateValidate;
 use App\Models\ConsumableLoan;
+use App\Services\ConsumableLoanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-// use Illuminate\Support\Facades\Storage;
-// use Illuminate\Support\Str;
 
 class ConsumableLoanController extends Controller
 {
+    protected $consumableLoanService;
+
+    public function __construct(ConsumableLoanService $consumableLoanService)
+    {
+        $this->consumableLoanService = $consumableLoanService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $data = ConsumableLoan::select('*')
-        ->latest()
-        ->get();
+        $data = $this->consumableLoanService->getAllConsumableLoans();
 
         return response()->json([
-            'status' => 200,
+            'status' => 'success',
             'data' => $data,
         ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        // $request->validate([
-        //     'student_id' => 'nullable|exists:students,id',
-        //     'teacher_id' => 'nullable|exists:teachers,id',
-        //     'consumable_item_id' => 'nullable|exists:consumable_items,id',
-        //     'quantity' => 'required|integer|min:1',
-        //     'purpose' => 'nullable|string|max:255',
-        //     'borrowed_by' => 'required|string|max:100',
-        //     'borrowed_at' => 'nullable|date',
-        // ]);
-
-
-        DB::beginTransaction();
-        try {
-            // $ConsumableLoan = ConsumableLoan::create([
-            //     'student_id' => $request->student_id,
-            //     'teacher_id' => $request->teacher_id,
-            //     'consumable_item_id' => $request->consumable_item_id,
-            //     'quantity' => $request->quantity,
-            //     'purpose' => $request->purpose,
-            //     'borrowed_by' => $request->borrowed_by,
-            //     'borrowed_at' => $request->borrowed_at,
-            // ]);
-
-            $ConsumableLoan = ConsumableLoan::create($request->all());
-            
-            DB::commit();
-            return response()->json([
-                'status' => 'success',
-                'message' => 'data created successfully'
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                'status' => 'error',
-                'message' => 'failed to create data',
-                'error' => $th->getMessage()
-            ]);
-        }
     }
 
     /**
@@ -77,26 +36,54 @@ class ConsumableLoanController extends Controller
      */
     public function show(ConsumableLoan $consumableLoan)
     {
-        // 
+        $consumableLoanData = $this->consumableLoanService->getConsumableLoanById($consumableLoan);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $consumableLoanData,
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreValidate $request)
+    {
+        $data = $request->validated();
+        
+        DB::beginTransaction();
+        try {
+            $newData = $this->consumableLoanService->createConsumableLoan($data);
+            
+            DB::commit();
+            return response()->json([
+                'status' => 201,
+                'message' => 'Consumable loan created successfully'
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ConsumableLoan $consumableLoan)
+    public function update(UpdateValidate $request, ConsumableLoan $consumableLoan)
     {
-        // $validatedData = $request->validate([
-        //     // 
-        // ])
+        $data = $request->validated();
 
         DB::beginTransaction();
         try {
-            $ConsumableLoan->whereId($ConsumableLoan->id)->update($request->all());
+            $updatedConsumableLoan = $this->consumableLoanService->updateConsumableLoan($consumableLoan, $data);
 
             DB::commit();
             return response()->json([
                 'status' => 200,
-                'message' => 'data updated successfully'
+                'message' => 'Consumable loan updated successfully'
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -112,22 +99,20 @@ class ConsumableLoanController extends Controller
      */
     public function destroy(ConsumableLoan $consumableLoan)
     {
-        DB::beginTransaction();
         try {
-            if (!$ConsumableLoan) {
+            if (!$consumableLoan) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'data not found'
                 ], 404);
             }
 
-            $ConsumableLoan->whereId($ConsumableLoan->id)->delete();
+            $this->consumableLoanService->deleteConsumableLoan($consumableLoan);
 
-            DB::commit();
             return response()->json([
                 'status' => 'success',
                 'message' => 'data deleted successfully'
-            ], 200);
+            ]);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
