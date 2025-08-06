@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Student;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StudentService
@@ -12,7 +14,24 @@ class StudentService
      */
     public function getAllStudents()
     {
-        return Student::with('major')->get();
+        // return Student::with('major')->get();
+        return Cache::remember('students_with_major', 60, function () {
+            return DB::select("
+            SELECT 
+                students.*,
+                majors.id AS major_id,
+                majors.name AS major_name,
+                majors.icon,
+                majors.color
+            FROM 
+                students
+            LEFT JOIN 
+                majors ON students.major_id = majors.id
+            ");
+        });
+
+        // $students = Student::where('name', 'LIKE', '%' . 'Muhamad Rafif' . '%')->get();
+        // return $students;
     }
 
     /**
@@ -24,7 +43,7 @@ class StudentService
             $newStudent = Student::create([
                 'name' => $data['name'],
                 'nis' => $data['nis'],
-                'rombel' => $data['rombel'],
+                // 'rombel' => $data['rombel'],
                 'rayon' => $data['rayon'],
                 'major_id' => $data['major_id'],
             ]);
@@ -41,8 +60,22 @@ class StudentService
      */
     public function getStudentById(Student $student)
     {
-        $student->load('major');
-        return $student;
+        $studentData = DB::select("
+            SELECT 
+                students.*, 
+                majors.id AS major_id,
+                majors.name AS major_name,
+                majors.icon,
+                majors.color
+            FROM 
+                students
+            LEFT JOIN 
+                majors ON students.major_id = majors.id
+            WHERE 
+                students.id = ?
+        ", [$student->id]);
+
+        return $studentData[0] ?? null;
     }
 
     /**
@@ -51,12 +84,12 @@ class StudentService
     public function updateStudent(Student $student, array $data)
     {
         try {
-            $student->whereId($student->id)->update([
-                'name' => $data['name'],
-                'nis' => $data['nis'],
-                'rombel' => $data['rombel'],
-                'rayon' => $data['rayon'],
-                'major_id' => $data['major_id'],
+            $student->update([
+                'name' => $data['name'] ?? $student->name,
+                'nis' => $data['nis'] ?? $student->nis,
+                // 'rombel' => $data['rombel'] ?? $student->rombel,
+                'rayon' => $data['rayon'] ?? $student->rayon,
+                'major_id' => $data['major_id'] ?? $student->major_id,
             ]);
 
             return $student;

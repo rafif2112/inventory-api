@@ -30,7 +30,7 @@ class UpdateValidate extends FormRequest
                 'required',
                 Rule::unique('students', 'nis')->ignore($studentId),
             ],
-            'rombel' => 'required',
+            // 'rombel' => 'required',
             'rayon' => 'required',
             'major_id' => 'required',
         ];
