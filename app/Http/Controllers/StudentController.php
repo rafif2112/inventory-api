@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Student\StoreValidate;
 use App\Http\Requests\Student\UpdateValidate;
+use App\Http\Resources\StudentResource;
+use App\Imports\StudentImport;
 use App\Models\Student;
 use App\Services\StudentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
@@ -27,7 +30,7 @@ class StudentController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $data,
+            'data' => StudentResource::collection($data),
         ]);
     }
 
@@ -65,7 +68,7 @@ class StudentController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $studentData,
+            'data' => new StudentResource($studentData),
         ]);
     }
 
@@ -118,6 +121,42 @@ class StudentController extends Controller
                 'status' => 'error',
                 'message' => 'failed to delete data'
             ]);
+        }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ],[
+            'file.required' => 'File is required',
+            'file.file' => 'The uploaded file must be a valid file',
+            'file.mimes' => 'The file must be a file of type: xlsx, csv, xls',
+        ]);
+        $file = $request->file('file');
+
+        if (!$file) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No file uploaded'
+            ], 400);
+        }
+
+        try {
+            $import = new StudentImport();
+            Excel::import($import, $file);
+
+            // Excel::import(new StudentImport, $request->file('file'));
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data imported successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to import data: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

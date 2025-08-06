@@ -34,6 +34,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user', [AuthController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    Route::post('/student/import', [StudentController::class, 'import']);
+
     Route::apiResource('/student', StudentController::class);
     Route::apiResource('/item', ItemController::class);
     Route::apiResource('/subitem', SubItemController::class);

@@ -25,7 +25,7 @@ class StoreValidate extends FormRequest
             //
             'name' => 'required',
             'nis' => 'required|unique:students,nis',
-            'rombel' => 'required',
+            // 'rombel' => 'required',
             'rayon' => 'required',
             'major_id' => 'required',
         ];

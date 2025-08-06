@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->integer('nis')->unique();
-            $table->string('rombel');
+            // $table->string('rombel');
             $table->string('rayon');
             $table->unsignedBigInteger('major_id')->nullable();
             $table->timestamps();
