@@ -11,12 +11,12 @@ class ConsumableLoan extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'student_id',
         'teacher_id',
         'consumable_item_id',
         'quantity',
         'purpose',
+        'borrowed_by',
         'borrowed_at',
     ];
 
