@@ -69,7 +69,7 @@ class ConsumableItemController extends Controller
      */
     public function show(ConsumableItem $consumableItem)
     {
-        $consumableItemData = $this->ConsumableItemService->getConsumableItemById($consumableItem);
+        $consumableItemData = $this->consumableItemService->getConsumableItemById($consumableItem);
 
         return response()->json([
             'status' => 'success',
