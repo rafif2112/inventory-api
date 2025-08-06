@@ -37,6 +37,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/student/import', [StudentController::class, 'import']);
 
     Route::apiResource('/student', StudentController::class);
+    Route::apiResource('/user', UserController::class);
     Route::apiResource('/item', ItemController::class);
     Route::apiResource('/subitem', SubItemController::class);
     Route::apiResource('/major', MajorController::class);

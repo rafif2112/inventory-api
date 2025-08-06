@@ -2,25 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\StoreValidate;
+use App\Http\Requests\User\UpdateValidate;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $data = $this->userService->getAllUsers();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreValidate $request)
     {
-        //
+        $data = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $newData = $this->userService->createUser($data);
+
+            DB::commit();
+            return response()->json([
+                'status' => 201,
+                'data' => $newData,
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 400,
+                'message' => 'failed to create new data'
+            ], 400);
+        }
     }
 
     /**
@@ -28,15 +61,37 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        $userData = $this->userService->getUserById($user);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $userData,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateValidate $request, User $user)
     {
-        //
+        $data = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $updatedUser = $this->userService->updateUser($user, $data);
+
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'data' => $updatedUser,
+            ]);
+        } catch (\Throwable) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update data',
+            ]);
+        }
     }
 
     /**
@@ -44,6 +99,25 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        try {
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'data not found',
+                ], 404);
+            }
+
+            $this->userService->deleteUser($user);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'data deleted successfully'
+            ]);
+        } catch (\Throwable) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to delete data'
+            ]);
+        }
     }
 }

@@ -21,8 +21,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'username',
+        'role',
+        'email_verified_at',
         'password',
+        'major_id',
     ];
 
     /**
@@ -43,4 +46,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class, 'major_id');
+    }
 }
