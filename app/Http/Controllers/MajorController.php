@@ -76,6 +76,10 @@ class MajorController extends Controller
     public function show(Major $major)
     {
         //
+        return response()->json([
+            'status' => 200,
+            'data' => $major,
+        ], 200);
     }
 
     /**
