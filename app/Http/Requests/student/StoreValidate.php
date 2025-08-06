@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,6 +23,11 @@ class StoreValidate extends FormRequest
     {
         return [
             //
+            'name' => 'required',
+            'nis' => 'required|unique:students,nis',
+            'rombel' => 'required',
+            'rayon' => 'required',
+            'major_id' => 'required',
         ];
     }
 }
