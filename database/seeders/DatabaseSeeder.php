@@ -18,6 +18,30 @@ class DatabaseSeeder extends Seeder
             'name' => 'PPLG',
             'color' => '#FF5733',
         ]);
+        Major::create([
+            'name' => 'DKV',
+            'color' => '#3357FF',
+        ]);
+        Major::create([
+            'name' => 'TJKT',
+            'color' => '#FF33A1',
+        ]);
+        Major::create([
+            'name' => 'MPLB',
+            'color' => '#FFB833',
+        ]);
+        Major::create([
+            'name' => 'KLN',
+            'color' => '#33FFA1',
+        ]);
+        Major::create([
+            'name' => 'HTL',
+            'color' => '#A133FF',
+        ]);
+        Major::create([
+            'name' => 'PMN',
+            'color' => '#FF5733',
+        ]);
 
         User::create([
             'name' => 'Super Admin',

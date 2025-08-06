@@ -28,9 +28,9 @@ class TeacherController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $data,
-        ]);
+        ], 200);
     }
 
     /**
@@ -57,9 +57,9 @@ class TeacherController extends Controller
         $teacherData = $this->teacherService->getTeacherById($id);
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $teacherData,
-        ]);
+        ], 200);
     }
 
     /**

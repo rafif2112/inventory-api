@@ -43,11 +43,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/major', MajorController::class);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
     Route::apiResource('/consumable-item', ConsumableItemController::class);
-    // Route::prefix('teachers')->group(function () {
-    //     Route::get('/', [TeacherController::class, 'index']);
-    //     Route::get('/{id}', [TeacherController::class, 'show']);
-    // });
-
     Route::apiResource('/teacher', TeacherController::class)->only('index', 'show');
+    
     Route::post('/teachers-import', [TeacherController::class, 'import']);
 });

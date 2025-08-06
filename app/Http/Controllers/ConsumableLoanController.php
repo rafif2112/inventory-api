@@ -26,9 +26,9 @@ class ConsumableLoanController extends Controller
         $data = $this->consumableLoanService->getAllConsumableLoans();
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $data,
-        ]);
+        ], 200);
     }
 
     /**
@@ -39,9 +39,9 @@ class ConsumableLoanController extends Controller
         $consumableLoanData = $this->consumableLoanService->getConsumableLoanById($consumableLoan);
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $consumableLoanData,
-        ]);
+        ], 200);
     }
 
     /**
@@ -110,9 +110,9 @@ class ConsumableLoanController extends Controller
             $this->consumableLoanService->deleteConsumableLoan($consumableLoan);
 
             return response()->json([
-                'status' => 'success',
+                'status' => 204,
                 'message' => 'data deleted successfully'
-            ]);
+            ], 204);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([

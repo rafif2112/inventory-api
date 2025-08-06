@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 use App\Models\Teacher;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -11,15 +10,17 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 class TeacherImport implements ToModel, WithHeadingRow, WithValidation
 {
     /**
-    * @param Collection $collection
+    * @param array $row
+    *
+    * @return \Illuminate\Database\Eloquent\Model|null
     */
     public function model(array $row)
     {
         return Teacher::updateOrCreate(
-            ['nip' => $row['Nip']],
+            ['nip' => $row['nip']],
             [
-                'name' => $row['Nama'],
-                'telephone' =>$row['No_Telepon'],
+                'name' => $row['nama'],
+                'telephone' =>$row['no_telp'],
             ]
         );
     }
@@ -28,8 +29,8 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'nip' => 'required',
-            'name' => 'required',
-            'telephone' => 'required',
+            'nama' => 'required',
+            'no_telp' => 'required',
         ];
     }
 
@@ -37,8 +38,8 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'nip.required' => 'NIP field is required',
-            'name.required' => 'Name field is required',
-            'telephone.required' => 'Telephone field is required',
+            'nama.required' => 'Name field is required',
+            'no_telp.required' => 'Telephone field is required',
         ];
     }
 }

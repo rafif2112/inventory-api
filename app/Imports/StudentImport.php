@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\Major;
 use App\Models\Student;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -10,17 +11,26 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 class StudentImport implements ToModel, WithHeadingRow, WithValidation
 {
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+     * @param array $row
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
     public function model(array $row)
     {
+        $majorName = explode(' ', $row['rombel'])[0] ?? null;
+        $majorId = null;
+
+        if ($majorName) {
+            $major = Major::where('name', $majorName)->first();
+            $majorId = $major ? $major->id : null;
+        }
+
         return Student::updateOrCreate(
             ['nis' => $row['nis']],
             [
                 'name' => $row['nama'],
                 'rayon' => $row['rayon'],
+                'major_id' => $majorId,
             ]
         );
     }

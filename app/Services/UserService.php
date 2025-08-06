@@ -40,11 +40,11 @@ class UserService
     public function updateUser(User $user, array $data) 
     {
         try {
-            $user = User::create([
+            $user->update([
                 'name' => $data['name'] ?? $user->name,
                 'username' => $data['username'] ?? $user->username,
                 'role' => $data['role'] ?? $user->role,
-                'password' => $data['password'] ?? $user->password,
+                'password' => isset($data['password']) ? Hash::make($data['password']) : $user->password,
                 'major_id' => $data['major_id'] ?? $user->major_id,
             ]);
 
