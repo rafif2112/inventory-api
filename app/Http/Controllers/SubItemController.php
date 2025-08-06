@@ -16,7 +16,7 @@ class SubItemController extends Controller
     public function index()
     {
         $data = SubItem::select('*')
-            ->latest()  
+            ->latest()
             ->get();
 
         return response()->json([
@@ -34,7 +34,7 @@ class SubItemController extends Controller
 
         DB::beginTransaction();
         try {
-            
+
             $subItem = SubItem::create($validated);
 
             DB::commit();
@@ -55,27 +55,30 @@ class SubItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SubItem $subItem)
+    public function show(SubItem $subitem)
     {
-        //
+        return response()->json([
+            'status' => 200,
+            'data' => $subitem,
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateValidate $request, SubItem $subItem)
+    public function update(UpdateValidate $request, SubItem $subitem)
     {
         $validated = $request->validated();
 
         DB::beginTransaction();
         try {
-            $subItem->update($validated);
+            $subitem->whereId($subitem->id)->update($validated);
 
             DB::commit();
             return response()->json([
                 'status' => 200,
                 'message' => 'Sub item updated successfully',
-                'data' => $subItem,
+                'data' => $subitem,
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -90,19 +93,19 @@ class SubItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SubItem $subItem)
+    public function destroy(SubItem $subitem)
     {
         DB::beginTransaction();
 
         try {
-            if(!$subItem) {
+            if(!$subitem) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Sub item not found',
                 ], 404);
             }
 
-            $subItem->whereId($subItem->id)->delete();
+            $subitem->whereId($subitem->id)->delete();
 
             DB::commit();
             return response()->json([

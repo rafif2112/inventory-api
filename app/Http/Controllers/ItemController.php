@@ -61,6 +61,10 @@ class ItemController extends Controller
     public function show(Item $item)
     {
         //
+        return response()->json([
+            'status' => 200,
+            'data' => $item,
+        ], 200);
     }
 
     /**
