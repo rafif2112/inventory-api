@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\TeacherImport;
 use App\Models\Teacher;
 use App\Services\TeacherService;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TeacherController extends Controller
 {
@@ -30,17 +32,6 @@ class TeacherController extends Controller
             'data' => $data,
         ]);
     }
-
-    // public function index(Request $request)
-    // {
-    //     $search = $request->search;
-    //     $data = $this->teacherService->searchTeachers($search);
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'data' => $data,
-    //     ]);
-    // }
 
     /**
      * Show the form for creating a new resource.
@@ -93,5 +84,39 @@ class TeacherController extends Controller
     public function destroy(Teacher $teacher)
     {
         //
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ],[
+            'file.required' => 'File is required',
+            'file.file' => 'The uploaded file must be a valid file',
+            'file.mimes' => 'The file must be a file of type: xlsx, csv, xls',
+        ]);
+        $file = $request->file('file');
+
+        if (!$file) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No file uploaded'
+            ], 400);
+        }
+
+        try {
+            $import = new TeacherImport();
+            Excel::import($import, $file);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data imported successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to import data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
