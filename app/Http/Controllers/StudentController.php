@@ -2,33 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Student\StoreValidate;
+use App\Http\Requests\Student\UpdateValidate;
 use App\Models\Student;
+use App\Services\StudentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $studentService;
+
+    public function __construct(StudentService $studentService)
     {
-        //
+        $this->studentService = $studentService;
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(Request $request)
     {
-        //
+        $data = $this->studentService->getAllStudents();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreValidate $request)
     {
-        //
+        $data = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $newData = $this->studentService->createStudent($data);
+
+            DB::commit();
+            return response()->json([
+                'status' => 201,
+                'data' => $newData,
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to create new data'
+            ]);
+        }
     }
 
     /**
@@ -36,23 +61,37 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        //
-    }
+        $studentData = $this->studentService->getStudentById($student);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Student $student)
-    {
-        //
+        return response()->json([
+            'status' => 'success',
+            'data' => $studentData,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Student $student)
+    public function update(UpdateValidate $request, Student $student)
     {
-        //
+        $data = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $updatedStudent = $this->studentService->updateStudent($student, $data);
+
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'data' => $updatedStudent,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to update data'
+            ]);
+        }
     }
 
     /**
@@ -60,6 +99,25 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        //
+        try {
+            if (!$student) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'data not found'
+                ], 404);
+            }
+
+            $this->studentService->deleteStudent($student);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'data deleted successfully'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'failed to delete data'
+            ]);
+        }
     }
 }
