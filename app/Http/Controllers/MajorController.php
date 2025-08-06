@@ -5,22 +5,36 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Major\StoreValidate;
 use App\Http\Requests\Major\UpdateValidate;
 use App\Models\Major;
+use App\Services\MajorService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MajorController extends Controller
 {
+
+    protected $majorService;
+
+    public function __construct(MajorService $majorService)
+    {
+        $this->majorService = $majorService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         //
-        $data = Major::select('*')
-        ->latest()
-        ->get();
+        $data = $this->majorService->getAllMajors();
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'No majors found',
+            ], 404);
+        }
 
         return response()->json([
             'status' => 200,
@@ -39,31 +53,7 @@ class MajorController extends Controller
         DB::beginTransaction();
         try {
 
-            if ($request->icon) {
-                $icon = $request->icon;
-                if (preg_match('/^data:image\/(\w+);base64,/', $icon, $type)) {
-                    $format = strtolower($type[1]); // jpg, png, jpeg, dll.
-
-                    if (!in_array($format, ['jpg', 'jpeg', 'png', 'webp'])) {
-                        return response()->json([
-                            'status' => 400,
-                            'message' => 'Invalid image format',
-                        ], 400);
-                    }
-                    $icon = preg_replace('/^data:image\/\w+;base64,/', '', $icon);
-                    $icon = str_replace(' ', '+', $icon);
-                    $filename = 'majors/' . time() . '-' . Str::slug($request->name) . '.' . $format;
-                    Storage::disk('local')->put($filename, base64_decode($icon));
-                    $data['icon'] = $filename;
-                } else {
-                    return response()->json([
-                        'status' => 400,
-                        'message' => 'Invalid base64 string',
-                    ], 400);
-                }
-            }
-
-            $major = Major::create($data);
+            $this->majorService->storeMajor($request, $data);
 
             DB::commit();
 
@@ -95,41 +85,12 @@ class MajorController extends Controller
     public function update(UpdateValidate $request, Major $major)
     {
         //
+        $validated = $request->validated();
 
         DB::beginTransaction();
         try {
-            $validated = $request->validated();
-            $updateData = [];
 
-            if ($request->icon) {
-                $icon = $request->icon;
-                if (preg_match('/^data:image\/(\w+);base64,/', $icon, $type)) {
-                    $format = strtolower($type[1]);
-                    if (!in_array($format, ['jpg', 'jpeg', 'png', 'webp'])) {
-                        return response()->json([
-                            'status' => 400,
-                            'message' => 'Invalid image format',
-                        ], 400);
-                    }
-
-                    $icon = preg_replace('/^data:image\/\w+;base64,/', '', $icon);
-                    $icon = str_replace(' ', '+', $icon);
-                    $filename = 'majors/' . time() . '-' . Str::slug($request->name) . '.' . $format;
-                    if ($major->icon) {
-                        Storage::disk('local')->delete($major->icon);
-                    }
-
-                    Storage::disk('local')->put($filename, base64_decode($icon));
-                    $updateData['icon'] = $filename;
-                } else {
-                    return response()->json([
-                        'status' => 400,
-                        'message' => 'Invalid base64 string',
-                    ], 400);
-                }
-            }
-
-            $major->whereId($major->id)->update(array_merge($validated, $updateData));
+            $this->majorService->updateMajor($major, $validated, $request);
 
             DB::commit();
 
@@ -155,11 +116,8 @@ class MajorController extends Controller
         //
         DB::beginTransaction();
         try {
-            if ($major->icon && Storage::disk('local')->exists($major->icon)) {
-                Storage::disk('local')->delete($major->icon);
-            }
 
-            $major->whereId($major->id)->delete();
+            $this->majorService->deleteMajor($major);
 
             DB::commit();
 
