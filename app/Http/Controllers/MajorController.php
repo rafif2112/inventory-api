@@ -7,8 +7,8 @@ use App\Http\Requests\Major\UpdateValidate;
 use App\Models\Major;
 use App\Services\MajorService;
 use Illuminate\Http\Request;
-    use Illuminate\Support\Facades\DB;
-    use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MajorController extends Controller
@@ -39,7 +39,7 @@ class MajorController extends Controller
         return response()->json([
             'status' => 200,
             'data' => $data,
-        ],200);
+        ], 200);
     }
 
     /**
@@ -61,12 +61,11 @@ class MajorController extends Controller
                 'status' => 201,
                 'message' => 'Major created successfully',
             ], 201);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'status' => 500,
-                'message' => 'Failed to create major',
-                'error' => $e->getMessage(),
+                'message' => 'Failed to create major: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -77,6 +76,10 @@ class MajorController extends Controller
     public function show(Major $major)
     {
         //
+        return response()->json([
+            'status' => 200,
+            'data' => $major,
+        ], 200);
     }
 
     /**
