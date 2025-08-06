@@ -12,6 +12,8 @@ class Teacher extends Model
 
     protected $fillable = [
         'name',
+        'nip',
+        'telephone',
     ];
 
     public function consumableLoans()
