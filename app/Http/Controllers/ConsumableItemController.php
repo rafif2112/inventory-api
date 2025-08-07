@@ -26,9 +26,9 @@ class ConsumableItemController extends Controller
         $data = $this->consumableItemService->getAllConsumableItems();
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $data,
-        ]);
+        ], 200);
     }
 
     /**
@@ -58,9 +58,9 @@ class ConsumableItemController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => $th->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -72,9 +72,9 @@ class ConsumableItemController extends Controller
         $consumableItemData = $this->consumableItemService->getConsumableItemById($consumableItem);
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $consumableItemData,
-        ]);
+        ], 200);
     }
 
     /**
@@ -104,9 +104,9 @@ class ConsumableItemController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to update data'
-            ]);
+            ], 500);
         }
     }
 
@@ -126,14 +126,14 @@ class ConsumableItemController extends Controller
             $this->consumableItemService->deleteConsumableItem($consumableItem);
 
             return response()->json([
-                'status' => 'success',
+                'status' => 200,
                 'message' => 'data deleted successfully'
-            ]);
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to delete data'
-            ]);
+            ], 500);
         }
     }
 }

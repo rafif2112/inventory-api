@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->string('nip')->unique();
+            $table->string('telephone', 20)->nullable();
             $table->timestamps();
         });
     }

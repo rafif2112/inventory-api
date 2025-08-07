@@ -26,9 +26,9 @@ class UserController extends Controller
         $data = $this->userService->getAllUsers();
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $data,
-        ]);
+        ], 200);
     }
 
     /**
@@ -64,9 +64,9 @@ class UserController extends Controller
         $userData = $this->userService->getUserById($user);
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => $userData,
-        ]);
+        ], 200);
     }
 
     /**
@@ -82,9 +82,9 @@ class UserController extends Controller
 
             DB::commit();
             return response()->json([
-                'status' => 'success',
+                'status' => 200,
                 'data' => $updatedUser,
-            ]);
+            ], 200);
         } catch (\Throwable) {
             DB::rollBack();
             return response()->json([
@@ -110,9 +110,9 @@ class UserController extends Controller
             $this->userService->deleteUser($user);
 
             return response()->json([
-                'status' => 'success',
+                'status' => 204,
                 'message' => 'data deleted successfully'
-            ]);
+            ], 204);
         } catch (\Throwable) {
             return response()->json([
                 'status' => 'error',

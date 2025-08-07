@@ -29,9 +29,9 @@ class StudentController extends Controller
         $data = $this->studentService->getAllStudents();
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => StudentResource::collection($data),
-        ]);
+        ], 200);
     }
 
     /**
@@ -67,9 +67,9 @@ class StudentController extends Controller
         $studentData = $this->studentService->getStudentById($student);
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => new StudentResource($studentData),
-        ]);
+        ], 200);
     }
 
     /**
@@ -85,9 +85,9 @@ class StudentController extends Controller
 
             DB::commit();
             return response()->json([
-                'status' => 'success',
+                'status' => 200,
                 'data' => $updatedStudent,
-            ]);
+            ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -113,9 +113,9 @@ class StudentController extends Controller
             $this->studentService->deleteStudent($student);
 
             return response()->json([
-                'status' => 'success',
+                'status' => 204,
                 'message' => 'data deleted successfully'
-            ]);
+            ], 204);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'error',
@@ -149,9 +149,9 @@ class StudentController extends Controller
             // Excel::import(new StudentImport, $request->file('file'));
 
             return response()->json([
-                'status' => 'success',
+                'status' => 201,
                 'message' => 'Data imported successfully'
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

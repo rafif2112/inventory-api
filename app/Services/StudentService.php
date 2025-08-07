@@ -14,8 +14,10 @@ class StudentService
      */
     public function getAllStudents()
     {
+        $search = request()->query('search', '');
+
         // return Student::with('major')->get();
-        return Cache::remember('students_with_major', 60, function () {
+        return Cache::remember('students_with_major_' . md5($search), now()->addMinutes(15), function () use ($search) {
             return DB::select("
             SELECT 
                 students.*,
@@ -27,11 +29,14 @@ class StudentService
                 students
             LEFT JOIN 
                 majors ON students.major_id = majors.id
-            ");
+            WHERE
+                students.nis::text LIKE CONCAT('%', ?::text, '%')
+            OR 
+                students.name ILIKE CONCAT('%', ?::text, '%')
+            OR 
+                students.rayon ILIKE CONCAT('%', ?::text, '%')
+            ", [$search, $search, $search]);
         });
-
-        // $students = Student::where('name', 'LIKE', '%' . 'Muhamad Rafif' . '%')->get();
-        // return $students;
     }
 
     /**
@@ -43,7 +48,6 @@ class StudentService
             $newStudent = Student::create([
                 'name' => $data['name'],
                 'nis' => $data['nis'],
-                // 'rombel' => $data['rombel'],
                 'rayon' => $data['rayon'],
                 'major_id' => $data['major_id'],
             ]);
@@ -87,7 +91,6 @@ class StudentService
             $student->update([
                 'name' => $data['name'] ?? $student->name,
                 'nis' => $data['nis'] ?? $student->nis,
-                // 'rombel' => $data['rombel'] ?? $student->rombel,
                 'rayon' => $data['rayon'] ?? $student->rayon,
                 'major_id' => $data['major_id'] ?? $student->major_id,
             ]);

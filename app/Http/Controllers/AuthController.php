@@ -17,14 +17,14 @@ class AuthController extends Controller
         $userId = Auth::id();
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'data' => [
                 'user_id' => $userId,
                 'name' => Auth::user()->name,
                 'username' => Auth::user()->username,
                 'role' => Auth::user()->role,
             ]
-        ]);
+        ], 200);
     }
 
     public function getLimiterKey(Request $request) {
@@ -81,9 +81,9 @@ class AuthController extends Controller
         Auth::guard('web')->logout();
         User::whereId(Auth::id());
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'message' => "berhasil logout"
-        ]);
+        ], 200);
     }
 
     /**
