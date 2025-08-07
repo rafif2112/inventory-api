@@ -5,8 +5,12 @@ namespace App\Services;
 use App\Models\UnitItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
-class UnitItemService{
+class UnitItemService
+{
 
     public function getAllUnitItems()
     {
@@ -16,20 +20,34 @@ class UnitItemService{
             ->get();
     }
 
-    public function storeUnitItem(array $data){
+    public function storeUnitItem(array $data)
+    {
 
-        try{
+        try {
+            // Buat nama file QR Code
+            $filename = 'qrcodes/' . time() . '-' . Str::slug($data['code_unit']) . '.svg';
+            
+            // Generate QR Code SVG dari code_unit
+            $qrcodeImage = QrCode::format('svg')
+                ->size(300)
+                ->generate($data['code_unit']);
+
+            // Simpan file ke storage/app/public/qrcodes/
+            Storage::disk('public')->put($filename, $qrcodeImage);
+
+            // Simpan ke database
             $newUnitItem = UnitItem::create([
-                'sub_item_id' => $data['sub_item_id'],
-                'code_unit' => $data['code_unit'],
-                'description' => $data['description'],
+                'sub_item_id'      => $data['sub_item_id'],
+                'code_unit'        => $data['code_unit'],
+                'qrcode'           => $filename, // path relatif dari storage/public
+                'description'      => $data['description'],
                 'procurement_date' => $data['procurement_date'],
-                'status' => $data['status'] ?? false,
-                'condition' => $data['condition'] ?? false,
+                'status'           => $data['status'],
+                'condition'        => $data['condition'],
             ]);
 
             return $newUnitItem;
-        }catch (\Throwable $e){
+        } catch (\Throwable $e) {
             Log::error('Failed to create unit item: ' . $e->getMessage());
             throw $e;
         }
@@ -43,8 +61,8 @@ class UnitItemService{
                 'code_unit' => $data['code_unit'],
                 'description' => $data['description'],
                 'procurement_date' => $data['procurement_date'],
-                'status' => $data['status'] ?? false,
-                'condition' => $data['condition'] ?? false,
+                'status' => $data['status'],
+                'condition' => $data['condition'],
             ]);
 
             return $unitItem;
@@ -53,6 +71,4 @@ class UnitItemService{
             throw $e;
         }
     }
-
-    
 }
