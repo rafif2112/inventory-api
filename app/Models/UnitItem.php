@@ -17,7 +17,7 @@ class UnitItem extends Model
         'procurement_date',
         'status',
         'condition',
-        'barcode',
+        'qrcode',
     ];
 
     public function subItem()
