@@ -2,64 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UnitLoan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UnitLoanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Tampilkan semua unit loan
     public function index()
     {
-        //
+        $unitLoans = DB::table('unit_loans')->get();
+        return response()->json($unitLoans);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Simpan unit loan baru
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'student_id'    => 'required|uuid|exists:students,id',
+            'teacher_id'    => 'required|uuid|exists:teachers,id',
+            'unit_item_id'  => 'required|uuid|exists:unit_items,id',
+            'borrowed_by'   => 'required|string',
+            'borrowed_at'   => 'required|date',
+            'returned_at'   => 'nullable|date',
+            'purpose'       => 'required|string',
+            'room'          => 'required|integer',
+            'status'        => 'boolean',
+            'signature'     => 'nullable|string',
+            'guarantee'     => 'required|in:BKP,kartu pelajar',
+        ]);
+
+        $id = DB::table('unit_loans')->insertGetId($validated);
+        $unitLoan = DB::table('unit_loans')->where('id', $id)->first();
+
+        return response()->json($unitLoan, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(UnitLoan $unitLoan)
+    // Tampilkan detail unit loan
+    public function show($id)
     {
-        //
+        $unitLoan = DB::table('unit_loans')->where('id', $id)->first();
+        return response()->json($unitLoan);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(UnitLoan $unitLoan)
+    // Update unit loan
+    public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'student_id'    => 'sometimes|uuid|exists:students,id',
+            'teacher_id'    => 'sometimes|uuid|exists:teachers,id',
+            'unit_item_id'  => 'sometimes|uuid|exists:unit_items,id',
+            'borrowed_by'   => 'sometimes|string',
+            'borrowed_at'   => 'sometimes|date',
+            'returned_at'   => 'nullable|date',
+            'purpose'       => 'sometimes|string',
+            'room'          => 'sometimes|integer',
+            'status'        => 'boolean',
+            'signature'     => 'nullable|string',
+            'guarantee'     => 'sometimes|in:BKP,kartu pelajar',
+        ]);
+
+        DB::table('unit_loans')->where('id', $id)->update($validated);
+        $unitLoan = DB::table('unit_loans')->where('id', $id)->first();
+
+        return response()->json($unitLoan);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, UnitLoan $unitLoan)
+    // Hapus unit loan
+    public function destroy($id)
     {
-        //
-    }
+        DB::table('unit_loans')->where('id', $id)->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(UnitLoan $unitLoan)
-    {
-        //
+        return response()->json(['message' => 'Unit loan deleted successfully']);
     }
 }
