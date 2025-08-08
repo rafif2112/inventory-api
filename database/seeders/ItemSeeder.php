@@ -21,8 +21,6 @@ class ItemSeeder extends Seeder
             ['name' => 'Mouse'],
             ['name' => 'Printer'],
             ['name' => 'Speaker'],
-            ['name' => 'Headset'],
-            ['name' => 'Webcam'],
             ['name' => 'Proyektor'],
             ['name' => 'Kabel HDMI'],
             ['name' => 'Router'],

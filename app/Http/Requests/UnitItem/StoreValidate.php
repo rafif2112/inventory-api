@@ -23,7 +23,7 @@ class StoreValidate extends FormRequest
     {
         return [
             'sub_item_id' => 'required|uuid|exists:sub_items,id',
-            'code_unit' => 'required|string|unique:unit_items,code_unit',
+            // 'code_unit' => 'required|string|unique:unit_items,code_unit',
             'description' => 'nullable|string',
             'procurement_date' => 'required|date',
             'status' => 'sometimes|boolean',

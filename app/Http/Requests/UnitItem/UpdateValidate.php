@@ -26,7 +26,7 @@ class UpdateValidate extends FormRequest
 
         return [
             'sub_item_id' => 'nullable|uuid|exists:sub_items,id',
-            'code_unit' => 'nullable|string|unique:unit_items,code_unit',
+            // 'code_unit' => 'nullable|string|unique:unit_items,code_unit',
             'description' => 'nullable|string',
             'procurement_date' => 'nullable|date',
             'status' => 'nullable|boolean',
