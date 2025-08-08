@@ -24,7 +24,7 @@ class UnitItemResource extends JsonResource
             'procurement_date' => $this->procurement_date,
             'status' => $this->status,
             'condition' => $this->condition,
-            'qrcode' => $this->qrcode,
+            'qrcode' => $this->qrcode !== null ? config('app.url') . '/storage' . '/' . $this->qrcode : null,
             'sub_item' => new SubItemResource($this->whenLoaded('subItem')),
         ];
 
