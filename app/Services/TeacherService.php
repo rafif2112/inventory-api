@@ -13,15 +13,15 @@ class TeacherService
     {
         // return Teacher::all();
 
-        $searchTerm = '%' . (string)($search ?? '') . '%';
+        // $searchTerm = '%' . (string)($search ?? '') . '%';
         $teachers = DB::select("
             SELECT * FROM teachers
             WHERE 
-                teachers.nip LIKE ?
+                teachers.nip::text LIKE CONCAT('%', ?::text, '%')
             OR 
-                teachers.name LIKE ?
+                teachers.name LIKE CONCAT('%', ?::text, '%')
             ORDER BY teachers.name ASC
-        ", [$searchTerm, $searchTerm]);
+        ", [$search, $search]);
 
         return $teachers;
     }

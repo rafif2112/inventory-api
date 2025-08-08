@@ -21,8 +21,6 @@ class StudentService
         $cacheKey = 'students_with_major_' . md5($search . $latestStudentTimestamp);
 
         return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($search) {
-            $like = '%' . $search . '%';
-
             return DB::select("
             SELECT
                 students.*,
@@ -35,12 +33,12 @@ class StudentService
             LEFT JOIN 
                 majors ON students.major_id = majors.id
             WHERE
-                students.nis LIKE ?
+                students.nis::text LIKE CONCAT('%', ?::text, '%')
             OR 
-                students.name LIKE ?
+                students.name LIKE CONCAT('%', ?::text, '%')
             OR 
-                students.rayon LIKE ?
-            ", [$like, $like, $like]);
+                students.rayon LIKE CONCAT('%', ?::text, '%')
+            ", [$search, $search, $search]);
         });
     }
 
