@@ -15,7 +15,7 @@ class UnitItemService
 
     public function getAllUnitItems()
     {
-        return UnitItem::with('subItem')
+        return UnitItem::with('subItem', 'subItem.item')
             ->select('*')
             ->latest()
             ->get();
@@ -38,18 +38,18 @@ class UnitItemService
 
         try {
             $subItem = SubItem::with('major')->find($data['sub_item_id']);
-            
+
             $lastUnitItem = UnitItem::where('sub_item_id', $data['sub_item_id'])
                 ->orderBy('id', 'desc')
                 ->first();
-            
-            $sequenceNumber = $lastUnitItem ? 
+
+            $sequenceNumber = $lastUnitItem ?
                 intval(substr($lastUnitItem->code_unit, -3)) + 1 : 1;
-            
+
             $codeUnit = $this->generateCodeUnit($subItem, $sequenceNumber);
-            
+
             $filename = 'qrcodes/' . time() . '-' . Str::slug($codeUnit) . '.svg';
-            
+
             $qrcodeImage = QrCode::format('svg')
                 ->size(300)
                 ->generate($codeUnit);
