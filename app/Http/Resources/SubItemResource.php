@@ -25,8 +25,6 @@ class SubItemResource extends JsonResource
             'stock' => $this->stock,
             'unit' => $this->unit,
             'major_id' => $this->major_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
             'item' => new ItemResource($this->whenLoaded('item')),
         ];
 
