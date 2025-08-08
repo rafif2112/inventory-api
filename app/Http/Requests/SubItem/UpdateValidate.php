@@ -22,11 +22,11 @@ class UpdateValidate extends FormRequest
     public function rules(): array
     {
         return [
-            'item_id' => 'required|exists:items,id',
-            'merk' => 'required|string|max:255',
-            'stock' => 'required|numeric',
-            'unit' => 'required|string|max:50',
-            'major_id' => 'required|exists:majors,id',
+            'item_id' => 'nullable|exists:items,id',
+            'merk' => 'nullable|string|max:255',
+            'stock' => 'nullable|numeric',
+            'unit' => 'nullable|string|max:50',
+            'major_id' => 'nullable|exists:majors,id',
         ];
     }
 }

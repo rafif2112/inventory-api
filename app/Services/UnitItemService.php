@@ -24,10 +24,8 @@ class UnitItemService
     {
 
         try {
-            // Buat nama file QR Code
             $filename = 'qrcodes/' . time() . '-' . Str::slug($data['code_unit']) . '.svg';
             
-            // Generate QR Code SVG dari code_unit
             $qrcodeImage = QrCode::format('svg')
                 ->size(300)
                 ->generate($data['code_unit']);
@@ -35,15 +33,14 @@ class UnitItemService
             // Simpan file ke storage/app/public/qrcodes/
             Storage::disk('public')->put($filename, $qrcodeImage);
 
-            // Simpan ke database
             $newUnitItem = UnitItem::create([
                 'sub_item_id'      => $data['sub_item_id'],
                 'code_unit'        => $data['code_unit'],
-                'qrcode'           => $filename, // path relatif dari storage/public
+                'qrcode'           => $filename,
                 'description'      => $data['description'],
                 'procurement_date' => $data['procurement_date'],
-                'status'           => $data['status'],
-                'condition'        => $data['condition'],
+                'status' => $data['status'] ?? true,
+                'condition' => $data['condition'] ?? true,
             ]);
 
             return $newUnitItem;
@@ -57,12 +54,12 @@ class UnitItemService
     {
         try {
             $unitItem->update([
-                'sub_item_id' => $data['sub_item_id'],
-                'code_unit' => $data['code_unit'],
-                'description' => $data['description'],
-                'procurement_date' => $data['procurement_date'],
-                'status' => $data['status'],
-                'condition' => $data['condition'],
+                'sub_item_id' => $data['sub_item_id'] ?? $unitItem->sub_item_id,
+                'code_unit' => $data['code_unit'] ?? $unitItem->code_unit,
+                'description' => $data['description'] ?? $unitItem->description,
+                'procurement_date' => $data['procurement_date'] ?? $unitItem->procurement_date,
+                'status' => $data['status'] ?? $unitItem->status,
+                'condition' => $data['condition'] ?? $unitItem->condition,
             ]);
 
             return $unitItem;

@@ -50,5 +50,11 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'), // password
             'major_id' => 1,
         ]);
+
+        $this->call([
+            ItemSeeder::class,
+            SubItemSeeder::class,
+            UnitItemSeeder::class,
+        ]);
     }
 }

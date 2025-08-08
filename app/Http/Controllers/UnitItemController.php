@@ -46,7 +46,7 @@ class UnitItemController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 201,
-                'data' => $newUnitItem,
+                'message' => 'Unit item created successfully',
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -73,16 +73,14 @@ class UnitItemController extends Controller
      */
     public function update(UpdateValidate $request, UnitItem $unitItem)
     {
-        //
         $data = $request->validated();
-
         DB::beginTransaction();
         try {
             $updatedUnitItem = $this->unitItemService->updateUnitItem($unitItem, $data);
             DB::commit();
             return response()->json([
                 'status' => 200,
-                'data' => $updatedUnitItem,
+                'message' => 'Unit item updated successfully',
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();

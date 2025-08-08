@@ -15,11 +15,16 @@ class StudentService
     public function getAllStudents()
     {
         $search = request()->query('search', '');
+        
+        // Check if there are new students in database
+        $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
+        $cacheKey = 'students_with_major_' . md5($search . $latestStudentTimestamp);
 
-        // return Student::with('major')->get();
-        return Cache::remember('students_with_major_' . md5($search), now()->addMinutes(15), function () use ($search) {
+        return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($search) {
+            $like = '%' . $search . '%';
+
             return DB::select("
-            SELECT 
+            SELECT
                 students.*,
                 majors.id AS major_id,
                 majors.name AS major_name,
@@ -30,12 +35,12 @@ class StudentService
             LEFT JOIN 
                 majors ON students.major_id = majors.id
             WHERE
-                students.nis::text LIKE CONCAT('%', ?::text, '%')
+                students.nis LIKE ?
             OR 
-                students.name ILIKE CONCAT('%', ?::text, '%')
+                students.name LIKE ?
             OR 
-                students.rayon ILIKE CONCAT('%', ?::text, '%')
-            ", [$search, $search, $search]);
+                students.rayon LIKE ?
+            ", [$like, $like, $like]);
         });
     }
 

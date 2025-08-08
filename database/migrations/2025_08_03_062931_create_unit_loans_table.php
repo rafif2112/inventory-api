@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('unit_loans', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
-            $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignUuid('student_id')->nullable()->constrained('students')->onDelete('cascade');
+            $table->foreignUuid('teacher_id')->nullable()->constrained('teachers')->onDelete('cascade');
             $table->foreignUuid('unit_item_id')->constrained('unit_items')->onDelete('cascade');
             $table->string('borrowed_by');
             $table->datetime('borrowed_at');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('purpose');
             $table->integer('room');
             $table->boolean('status')->default(true); // true for borrowed, false for returned
-            $table->string('signature')->nullable();
+            $table->string('image')->nullable();
             $table->enum('guarantee', ['BKP', 'kartu pelajar'])->default('kartu pelajar');
             $table->timestamps();
         });

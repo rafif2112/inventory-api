@@ -72,13 +72,18 @@ class SubItemController extends Controller
 
         DB::beginTransaction();
         try {
-            $subitem->whereId($subitem->id)->update($validated);
+            $subitem->whereId($subitem->id)->update([
+                'item_id' => $validated['item_id'] ?? $subitem->item_id,
+                'merk' => $validated['merk'] ?? $subitem->merk,
+                'stock' => $validated['stock'] ?? $subitem->stock,
+                'unit' => $validated['unit'] ?? $subitem->unit,
+                'major_id' => $validated['major_id'] ?? $subitem->major_id,
+            ]);
 
             DB::commit();
             return response()->json([
                 'status' => 200,
                 'message' => 'Sub item updated successfully',
-                'data' => $subitem,
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();

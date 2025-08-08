@@ -21,11 +21,7 @@ class TeacherController extends Controller
     {
         $search = $request->search;
 
-        if ($search) {
-            $data = $this->teacherService->searchTeachers($search);
-        } else {
-            $data = $this->teacherService->getAllTeachers();
-        }
+        $data = $this->teacherService->getAllTeachers($search);
 
         return response()->json([
             'status' => 200,
@@ -55,6 +51,13 @@ class TeacherController extends Controller
     public function show($id)
     {
         $teacherData = $this->teacherService->getTeacherById($id);
+
+        if (!$teacherData) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Teacher not found',
+            ], 404);
+        }
 
         return response()->json([
             'status' => 200,
@@ -90,7 +93,7 @@ class TeacherController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,xls',
-        ],[
+        ], [
             'file.required' => 'File is required',
             'file.file' => 'The uploaded file must be a valid file',
             'file.mimes' => 'The file must be a file of type: xlsx, csv, xls',

@@ -10,6 +10,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UnitItemController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConsumableLoanController;
+use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/student/import', [StudentController::class, 'import']);
+    Route::post('/teachers-import', [TeacherController::class, 'import']);
+    Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
 
     Route::apiResource('/student', StudentController::class);
     Route::apiResource('/user', UserController::class);
@@ -46,6 +49,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/consumable-item', ConsumableItemController::class);
     Route::apiResource('/teacher', TeacherController::class)->only('index', 'show');
     Route::apiResource('/unit-items', UnitItemController::class);
-    
-    Route::post('/teachers-import', [TeacherController::class, 'import']);
+    Route::apiResource('/unit-loan', UnitLoanController::class);
 });
