@@ -15,11 +15,11 @@ class UnitItemSeeder extends Seeder
      */
     public function run(): void
     {
-        $subItems = SubItem::all();
-        
+        $subItems = SubItem::with('major')->get();
+
         foreach ($subItems as $subItem) {
             $maxUnits = min($subItem->stock, 5);
-            
+
             for ($i = 1; $i <= $maxUnits; $i++) {
                 UnitItem::create([
                     'sub_item_id' => $subItem->id,
@@ -28,24 +28,24 @@ class UnitItemSeeder extends Seeder
                     'procurement_date' => Carbon::now()->subDays(rand(30, 365)),
                     'status' => rand(0, 1) ? true : false,
                     'condition' => rand(0, 9) < 8 ? true : false,
-                    'barcode' => null,
+                    'qrcode' => null,
                 ]);
             }
         }
     }
 
     /**
-     * Generate code unit berdasarkan sub item dan nomor urut
+     * Generate code unit berdasarkan major dan merk sub item
      */
     private function generateCodeUnit(SubItem $subItem, int $number): string
     {
+        $majorCode = strtoupper($subItem->major->name ?? 'UNK');
+
         $words = explode(' ', $subItem->merk);
-        $merkCode = strtoupper(substr($words[0], 0, 2) . substr($words[1] ?? '', 0, 1));
-        
-        $year = Carbon::now()->year;
+        $merkCode = strtoupper(substr($words[0], 0, 3));
+
         $sequence = str_pad($number, 3, '0', STR_PAD_LEFT);
-        $subItemHash = substr($subItem->id, 0, 4);
-        
-        return "{$merkCode}-{$year}-{$subItemHash}-{$sequence}";
+
+        return "{$majorCode}-{$merkCode}-{$sequence}";
     }
 }

@@ -28,7 +28,7 @@ class StoreValidate extends FormRequest
             'procurement_date' => 'required|date',
             'status' => 'sometimes|boolean',
             'condition' => 'sometimes|boolean',
-            // barcode tidak divalidasi karena akan diisi otomatis
+            // qrcode tidak divalidasi karena akan diisi otomatis
         ];
     }
 }

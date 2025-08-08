@@ -31,7 +31,7 @@ class UpdateValidate extends FormRequest
             'procurement_date' => 'nullable|date',
             'status' => 'nullable|boolean',
             'condition' => 'nullable|boolean',
-            // barcode tidak divalidasi karena akan diisi otomatis
+            // qrcode tidak divalidasi karena akan diisi otomatis
         ];
     }
 }
