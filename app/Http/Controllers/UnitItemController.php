@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UnitItem\StoreValidate;
 use App\Http\Requests\UnitItem\UpdateValidate;
+use App\Http\Resources\UnitItemResource;
 use App\Models\UnitItem;
 use App\Services\UnitItemService;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class UnitItemController extends Controller
         $unitItems = $this->unitItemService->getAllUnitItems();
         return response()->json([
             'status' => 200,
-            'data' => $unitItems,
+            'data' => UnitItemResource::collection($unitItems),
         ], 200);
     }
 
