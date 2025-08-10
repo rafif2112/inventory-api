@@ -9,6 +9,7 @@ use App\Http\Controllers\ConsumableItemController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UnitItemController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
@@ -50,4 +51,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/teacher', TeacherController::class)->only('index', 'show');
     Route::apiResource('/unit-items', UnitItemController::class);
     Route::apiResource('/unit-loan', UnitLoanController::class);
+    Route::apiResource('/log-activity', LogActivityController::class)->only('index');
 });
