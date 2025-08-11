@@ -16,7 +16,7 @@ class UnitLoanService
      */
     public function getAllUnitLoans()
     {
-        return UnitLoan::with(['student', 'teacher', 'unitItem'])
+        return UnitLoan::with(['student', 'teacher', 'unitItem', 'unitItem.subItem', 'unitItem.subItem.item'])
             ->orderBy('borrowed_at', 'desc')
             ->get();
     }

@@ -6,6 +6,7 @@ use App\Http\Requests\UnitLoan\StoreValidate;
 use App\Http\Requests\UnitLoan\UpdateValidate;
 use App\Http\Resources\CheckLoan\IsBorrowedResource;
 use App\Http\Resources\UnitItemResource;
+use App\Http\Resources\UnitLoanResource;
 use App\Models\UnitLoan;
 use App\Services\UnitLoanService;
 use Illuminate\Http\Request;
@@ -29,7 +30,8 @@ class UnitLoanController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $unitLoans
+            // 'data' => $unitLoans
+            'data' => UnitLoanResource::collection($unitLoans)
         ], 200);
     }
 
@@ -82,16 +84,18 @@ class UnitLoanController extends Controller
             
             $unitLoan = $this->unitLoanService->createUnitLoan($validated, $request);
 
+            $unitLoan->load(['student', 'teacher', 'unitItem']);
+
             DB::commit();
             return response()->json([
-                'status' => 201,
-                'message' => 'Unit loan created successfully',
-            ], 201);
+                'status' => 200,
+                'data' => new UnitLoanResource($unitLoan),
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status' => 500,
-                'message' => 'Failed to create unit loan: ' . $e->getMessage()
+                'message' => $e->getMessage()
             ], 500);
         }
     }

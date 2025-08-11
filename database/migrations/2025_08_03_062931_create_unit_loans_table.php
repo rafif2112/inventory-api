@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('room');
             $table->boolean('status')->default(true); // true for borrowed, false for returned
             $table->string('image')->nullable();
-            $table->enum('guarantee', ['BKP', 'kartu pelajar'])->default('kartu pelajar');
+            $table->enum('guarantee', ['BKP', 'kartu pelajar'])->default('kartu pelajar')->nullable();
             $table->timestamps();
         });
     }

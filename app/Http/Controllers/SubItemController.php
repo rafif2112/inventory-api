@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\SubItem\StoreValidate;
 use App\Http\Requests\SubItem\UpdateValidate;
+use App\Http\Resources\SubItemResource;
 use App\Models\SubItem;
 
 class SubItemController extends Controller
@@ -15,13 +16,11 @@ class SubItemController extends Controller
      */
     public function index()
     {
-        $data = SubItem::select('*')
-            ->latest()
-            ->get();
+        $data = SubItem::with(['item', 'major'])->get();
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => SubItemResource::collection($data)
         ], 200);
     }
 
