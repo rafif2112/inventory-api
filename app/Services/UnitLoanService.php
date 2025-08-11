@@ -77,7 +77,7 @@ class UnitLoanService
                     'status' => true,
                     'guarantee' => $data['guarantee'],
                 ];
-                
+
                 $unitLoan = UnitLoan::create($loanData);
 
                 if ($request && $request->image) {
@@ -124,7 +124,7 @@ class UnitLoanService
     public function updateUnitLoan(UnitLoan $unitLoan, array $data, Request $request)
     {
         try {
-            
+
             $unitItem = UnitItem::findOrFail($unitLoan->unit_item_id);
 
             $updateData = [
@@ -171,7 +171,6 @@ class UnitLoanService
             }
 
             return $unitLoan;
-
         } catch (\Throwable $th) {
             Log::error('Failed to update unit loan: ' . $th->getMessage());
             throw $th;
@@ -190,5 +189,56 @@ class UnitLoanService
             Log::error('Failed to delete unit loan: ' . $th->getMessage());
             throw $th;
         }
+    }
+
+    public function getLoanHistory($sortTime, $sortType, $search, $data)
+    {
+        $query = UnitLoan::with(['unitItem', 'student', 'teacher', 'unitItem.subItem', 'unitItem.subItem.item'])
+            ->orderBy('borrowed_at', $sortTime === 'asc' ? 'asc' : 'desc')
+            ->when($data === 'returning', function ($query) {
+                return $query->where('status', false);
+            }, function ($query) {
+                return $query->where('status', true);
+            });
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('unitItem.subItem.item', function ($subQuery) use ($search) {
+                    $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+                })
+                    ->orWhereHas('student', function ($subQuery) use ($search) {
+                        $subQuery->whereRaw('LOWER(name) LIKE ? OR nis::text LIKE ?', [
+                            '%' . strtolower($search) . '%',
+                            '%' . $search . '%'
+                        ]);
+                    })
+                    ->orWhereHas('teacher', function ($subQuery) use ($search) {
+                        $subQuery->whereRaw('nip::text LIKE ? OR LOWER(name) LIKE ?', [
+                            '%' . $search . '%',
+                            '%' . strtolower($search) . '%'
+                        ]);
+                    })
+                    ->orWhereHas('unitItem', function ($subQuery) use ($search) {
+                        $subQuery->whereRaw('LOWER(code_unit) LIKE ?', ['%' . strtolower($search) . '%']);
+                    })
+                    ->orWhereHas('unitItem.subItem', function ($subQuery) use ($search) {
+                        $subQuery->whereRaw('LOWER(merk) LIKE ?', ['%' . strtolower($search) . '%']);
+                    });
+            });
+        }
+
+        $loans = $query->get();
+
+        if (!empty($sortType)) {
+            $loans = $loans->sortBy(function ($loan) {
+                return strtolower($loan->unitItem->subItem->item->name ?? '');
+            });
+            if (strtolower($sortType) === 'desc') {
+                $loans = $loans->reverse();
+            }
+            $loans = $loans->values();
+        }
+
+        return $loans;
     }
 }

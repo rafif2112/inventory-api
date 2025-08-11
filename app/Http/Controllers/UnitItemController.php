@@ -8,6 +8,7 @@ use App\Http\Resources\UnitItemResource;
 use App\Models\UnitItem;
 use App\Services\UnitItemService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UnitItemController extends Controller
@@ -23,10 +24,11 @@ class UnitItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        $unitItems = $this->unitItemService->getAllUnitItems();
+        $user = Auth::user();
+        $unitItems = $this->unitItemService->getAllUnitItems($user);
+
         return response()->json([
             'status' => 200,
             'data' => UnitItemResource::collection($unitItems),
