@@ -24,10 +24,10 @@ class UpdateValidate extends FormRequest
         // $majorId = $this->route('consumable-item')->major_id;
 
         return [
-            'name' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:0',
-            'unit' => 'required|string|max:50',
-            'major_id' => 'required|exists:majors,id',
+            'name' => 'nullable|string|max:255',
+            'quantity' => 'nullable|integer|min:0',
+            'unit' => 'nullable|string|max:50',
+            'major_id' => 'nullable|exists:majors,id',
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Student\StoreValidate;
 use App\Http\Requests\Student\UpdateValidate;
+use App\Http\Resources\PaginationResource;
 use App\Http\Resources\StudentResource;
 use App\Imports\StudentImport;
 use App\Models\Student;
@@ -31,6 +32,19 @@ class StudentController extends Controller
         return response()->json([
             'status' => 200,
             'data' => StudentResource::collection($data),
+        ], 200);
+    }
+
+    public function getStudentData(Request $request)
+    {
+        $search = $request->query('search', '');
+        $page = $request->query('page', 1);
+        $data = $this->studentService->getStudentData($search, $page);
+
+        return response()->json([
+            'status' => 200,
+            'data' => StudentResource::collection($data['data']),
+            'meta' => new PaginationResource($data['meta']),
         ], 200);
     }
 
@@ -113,9 +127,9 @@ class StudentController extends Controller
             $this->studentService->deleteStudent($student);
 
             return response()->json([
-                'status' => 204,
+                'status' => 200,
                 'message' => 'data deleted successfully'
-            ], 204);
+            ], 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'error',

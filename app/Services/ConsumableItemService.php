@@ -21,12 +21,14 @@ class ConsumableItemService
     public function createConsumableItem(array $data)
     {
         try {
-            $newItem = ConsumableItem::create([
-                'name' => $data['name'],
-                'unit' => $data['unit'],
-                'quantity' => $data['quantity'],
-                'major_id' => $data['major_id'],
-            ]);
+            $newItem = ConsumableItem::updateOrCreate(
+                ['name' => $data['name']],
+                [
+                    'unit' => $data['unit'],
+                    'quantity' => $data['quantity'],
+                    'major_id' => $data['major_id'],
+                ]
+            );
 
             return $newItem;
         } catch (\Throwable $th) {
@@ -50,10 +52,10 @@ class ConsumableItemService
     {
         try {
             $consumableItem->update([
-                'name' => $data['name'],
-                'unit' => $data['unit'],
-                'major_id' => $data['major_id'],
-                'quantity' => $data['quantity'],
+                'name' => $data['name'] ?? $consumableItem->name,
+                'unit' => $data['unit'] ?? $consumableItem->unit,
+                'major_id' => $data['major_id'] ?? $consumableItem->major_id,
+                'quantity' => $data['quantity'] ?? $consumableItem->quantity,
             ]);
 
             return $consumableItem;

@@ -41,6 +41,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/teachers-import', [TeacherController::class, 'import']);
     Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
     Route::get('/unit-loan/history', [UnitLoanController::class, 'getLoanHistory']);
+    Route::get('/student/data', [StudentController::class, 'getStudentData']);
+    Route::get('/teacher/data', [TeacherController::class, 'getTeacherData']);
 
     Route::apiResource('/student', StudentController::class);
     Route::apiResource('/user', UserController::class);

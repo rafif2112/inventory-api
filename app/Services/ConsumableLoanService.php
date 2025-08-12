@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ConsumableItem;
 use App\Models\ConsumableLoan;
 use Illuminate\Support\Facades\Log;
 
@@ -25,6 +26,9 @@ class ConsumableLoanService
                 'borrowed_at' => $data['borrowed_at'],
             ]);
 
+            $consumableItem = ConsumableItem::findOrFail($data['consumable_item_id']);
+            $consumableItem->decrement('quantity', $data['quantity']);
+
             return $newLoan;
         } catch (\Throwable $th) {
             Log::error('Failed to create consumable loan: ' . $th->getMessage());
@@ -40,13 +44,13 @@ class ConsumableLoanService
     {
         try {
             $consumableLoan->update([
-                'student_id' => $data['student_id'],
-                'teacher_id' => $data['teacher_id'],
-                'consumable_item_id' => $data['consumable_item_id'],
-                'quantity' => $data['quantity'],
-                'purpose' => $data['purpose'],
-                'borrowed_by' => $data['borrowed_by'],
-                'borrowed_at' => $data['borrowed_at'],
+                'student_id' => $data['student_id'] ?? $consumableLoan->student_id,
+                'teacher_id' => $data['teacher_id'] ?? $consumableLoan->teacher_id,
+                'consumable_item_id' => $data['consumable_item_id'] ?? $consumableLoan->consumable_item_id,
+                'quantity' => $data['quantity'] ?? $consumableLoan->quantity,
+                'purpose' => $data['purpose'] ?? $consumableLoan->purpose,
+                'borrowed_by' => $data['borrowed_by'] ?? $consumableLoan->borrowed_by,
+                'borrowed_at' => $data['borrowed_at'] ?? $consumableLoan->borrowed_at,
             ]);
 
             return $consumableLoan;

@@ -15,10 +15,10 @@ class StudentService
     public function getAllStudents()
     {
         $search = request()->query('search', '');
-        
+
         // Check if there are new students in database
         $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
-        $cacheKey = 'students_with_major_' . md5($search . $latestStudentTimestamp);
+        $cacheKey = 'students_' . md5($search . $latestStudentTimestamp);
 
         return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($search) {
             return DB::select("
@@ -34,11 +34,65 @@ class StudentService
                 majors ON students.major_id = majors.id
             WHERE
                 students.nis::text LIKE CONCAT('%', ?::text, '%')
-            OR 
-                students.name LIKE CONCAT('%', ?::text, '%')
-            OR 
-                students.rayon LIKE CONCAT('%', ?::text, '%')
+            ", [$search]);
+        });
+    }
+
+    public function getStudentData($search = '', $page = 1, $perPage = 20)
+    {
+        $offset = ($page - 1) * $perPage;
+        $cacheKey = 'students_data_' . md5($search . $page . $perPage);
+
+        return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($search, $perPage, $offset, $page) {
+            $data = DB::select("
+                SELECT
+                    students.*,
+                    majors.id AS major_id,
+                    majors.name AS major_name,
+                    majors.icon,
+                    majors.color
+                FROM
+                    students
+                LEFT JOIN
+                    majors ON students.major_id = majors.id
+                WHERE
+                    students.nis::text LIKE CONCAT('%', ?::text, '%')
+                OR
+                    students.name ILIKE CONCAT('%', ?::text, '%')
+                OR
+                    students.rayon ILIKE CONCAT('%', ?::text, '%')
+                ORDER BY students.nis ASC
+                LIMIT ? OFFSET ?
+            ", [$search, $search, $search, $perPage, $offset]);
+
+            $totalCount = DB::select("
+                SELECT COUNT(*) as total
+                FROM
+                    students
+                LEFT JOIN
+                    majors ON students.major_id = majors.id
+                WHERE
+                    students.nis::text LIKE CONCAT('%', ?::text, '%')
+                OR
+                    students.name ILIKE CONCAT('%', ?::text, '%')
+                OR
+                    students.rayon ILIKE CONCAT('%', ?::text, '%')
             ", [$search, $search, $search]);
+
+            $total = $totalCount[0]->total ?? 0;
+            $totalPages = ceil($total / $perPage);
+
+            return [
+                'data' => $data,
+                'meta' => [
+                    'current_page' => (int) $page,
+                    'from' => (int) (($page - 1) * $perPage + 1),
+                    'last_page' => (int) $totalPages,
+                    'per_page' => (int) $perPage,
+                    'to' => (int) min($page * $perPage, $total),
+                    'total' => (int) $total,
+                ]
+            ];
         });
     }
 
@@ -54,6 +108,8 @@ class StudentService
                 'rayon' => $data['rayon'],
                 'major_id' => $data['major_id'],
             ]);
+
+            $this->clearStudentCache();
 
             return $newStudent;
         } catch (\Throwable $th) {
@@ -97,6 +153,8 @@ class StudentService
                 'rayon' => $data['rayon'] ?? $student->rayon,
                 'major_id' => $data['major_id'] ?? $student->major_id,
             ]);
+            
+            $this->clearStudentCache();
 
             return $student;
         } catch (\Throwable $th) {
@@ -112,10 +170,23 @@ class StudentService
     {
         try {
             $student->delete();
+            $this->clearStudentCache();
             return true;
         } catch (\Throwable $th) {
             Log::error('Failed to delete student: ' . $th->getMessage());
             throw $th;
+        }
+    }
+
+    private function clearStudentCache()
+    {
+        $cacheKeys = [
+            'students_*',
+            'students_data_*'
+        ];
+        
+        foreach ($cacheKeys as $pattern) {
+            Cache::flush();
         }
     }
 }
