@@ -56,9 +56,11 @@ class SubItemController extends Controller
      */
     public function show(SubItem $subitem)
     {
+        $subitem->load(['item', 'major']);
+
         return response()->json([
             'status' => 200,
-            'data' => $subitem,
+            'data' => new SubItemResource($subitem),
         ], 200);
     }
 

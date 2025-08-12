@@ -13,12 +13,20 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class UnitItemService
 {
 
-    public function getAllUnitItems()
+    public function getAllUnitItems($user)
     {
-        return UnitItem::with('subItem', 'subItem.item')
-            ->select('*')
-            ->latest()
-            ->get();
+
+        $query = UnitItem::with('subItem', 'subItem.item');
+
+        if ($user->role != 'superadmin' && !empty($user->role)) {
+            $query->whereHas('subItem', function ($q) use ($user) {
+                $q->where('major_id', $user->major_id);
+            });
+        }
+
+        $data = $query->get();
+
+        return $data;
     }
 
     private function generateCodeUnit($subItem, int $number): string

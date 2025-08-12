@@ -40,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/student/import', [StudentController::class, 'import']);
     Route::post('/teachers-import', [TeacherController::class, 'import']);
     Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
+    Route::get('/unit-loan/history', [UnitLoanController::class, 'getLoanHistory']);
 
     Route::apiResource('/student', StudentController::class);
     Route::apiResource('/user', UserController::class);

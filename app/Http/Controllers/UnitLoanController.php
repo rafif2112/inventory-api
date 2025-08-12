@@ -180,4 +180,26 @@ class UnitLoanController extends Controller
             ], 500);
         }
     }
+
+    public function getLoanHistory(Request $request)
+    {
+        try {
+            $sortTime = $request->query('sort-by-time', 'desc');
+            $sortType = $request->query('sort-by-type');
+            $search = strtolower($request->query('search'));
+            $data = $request->query('data');
+
+            $history = $this->unitLoanService->getLoanHistory($sortTime, $sortType, $search, $data);
+
+            return response()->json([
+                'status' => 200,
+                'data' => UnitLoanResource::collection($history)
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to retrieve loan history: ' . $th->getMessage()
+            ], 500);
+        }
+    }
 }
