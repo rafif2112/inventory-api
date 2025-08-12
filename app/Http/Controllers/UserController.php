@@ -31,6 +31,29 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function indexPaginate(Request $request)
+    {
+
+        $search = $request->query('search', '');
+        $sortDir = $request->query('sort_dir', 'asc');
+
+        $users = $this->userService->getUsersWithMajorPaginate($search, $sortDir);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Users retrieved successfully',
+            'data' => $users,
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'from' => $users->firstItem(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'to' => $users->lastItem(),
+                'total' => $users->total(),
+            ]
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

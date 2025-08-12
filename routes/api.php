@@ -43,6 +43,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('/student', StudentController::class);
     Route::apiResource('/user', UserController::class);
+    Route::get('/user/paginate', [UserController::class, 'indexPaginate']);
     Route::apiResource('/item', ItemController::class);
     Route::apiResource('/subitem', SubItemController::class);
     Route::apiResource('/major', MajorController::class);

@@ -13,6 +13,19 @@ class UserService
         return User::with('major')->get();
     }
 
+    public function getUsersWithMajorPaginate(string $search = '', string $sortDir = 'asc', int $perPage = 10)
+    {
+        $sortDir = in_array(strtolower($sortDir), ['asc', 'desc']) ? $sortDir : 'asc';
+
+        return User::select('users.*')
+            ->leftJoin('majors', 'users.major_id', '=', 'majors.id')
+            ->when($search, function ($query) use ($search) {
+                return $query->where('users.name', 'like', "%{$search}%");
+            })
+            ->orderBy('majors.id', $sortDir)
+            ->paginate($perPage);
+    }
+
     public function createUser(array $data)
     {
         try {
@@ -37,7 +50,7 @@ class UserService
         return $user;
     }
 
-    public function updateUser(User $user, array $data) 
+    public function updateUser(User $user, array $data)
     {
         try {
             $user->update([
@@ -55,7 +68,7 @@ class UserService
         }
     }
 
-    public function deleteUser(User $user) 
+    public function deleteUser(User $user)
     {
         try {
             $user->delete();
@@ -66,4 +79,3 @@ class UserService
         }
     }
 }
-

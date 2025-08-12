@@ -22,8 +22,8 @@ class UnitItemResource extends JsonResource
             'code_unit' => $this->code_unit,
             'description' => $this->description,
             'procurement_date' => $this->procurement_date,
-            'status' => $this->status,
-            'condition' => $this->condition,
+            'status' => $this->status === true ? 'available' : 'unavailable',
+            'condition' => $this->condition === true ? 'good' : 'damaged',
             'qrcode' => $this->qrcode !== null ? url('/storage' . '/' . $this->qrcode) : null,
             'sub_item' => new SubItemResource($this->whenLoaded('subItem')),
         ];
