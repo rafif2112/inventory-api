@@ -110,9 +110,9 @@ class ConsumableLoanController extends Controller
             $this->consumableLoanService->deleteConsumableLoan($consumableLoan);
 
             return response()->json([
-                'status' => 204,
+                'status' => 200,
                 'message' => 'data deleted successfully'
-            ], 204);
+            ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
