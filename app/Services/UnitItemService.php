@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\UnitItem;
 use App\Models\SubItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -34,7 +35,7 @@ class UnitItemService
         $majorCode = strtoupper($subItem->major->name ?? 'UNK');
 
         $words = explode(' ', $subItem->merk);
-        $merkCode = strtoupper(substr($words[0], 0, 3));
+        $merkCode = strtoupper(substr($words[0], 0, 4));
 
         $sequence = str_pad($number, 3, '0', STR_PAD_LEFT);
 
@@ -45,9 +46,25 @@ class UnitItemService
     {
 
         try {
-            $subItem = SubItem::with('major')->find($data['sub_item_id']);
+            $subItem = SubItem::with('major')
+                ->where('item_id', $data['item_id'])
+                ->where(function ($query) use ($data) {
+                    $query->whereRaw("LOWER(REPLACE(merk, ' ', '')) = ?", [
+                        strtolower(str_replace(' ', '', $data['merk']))
+                    ]);
+                })->first();
 
-            $lastUnitItem = UnitItem::where('sub_item_id', $data['sub_item_id'])
+            if (!$subItem) {
+                $newSubItem = SubItem::create([
+                    'merk' => $data['merk'],
+                    'item_id' => $data['item_id'],
+                    'major_id' => Auth::user()->major_id,
+                ]);
+
+                $subItem = $newSubItem;
+            }
+
+            $lastUnitItem = UnitItem::where('sub_item_id', $subItem->id)
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -62,11 +79,10 @@ class UnitItemService
                 ->size(300)
                 ->generate($codeUnit);
 
-            // Simpan file ke storage/app/public/qrcodes/
             Storage::disk('public')->put($filename, $qrcodeImage);
 
             $newUnitItem = UnitItem::create([
-                'sub_item_id'      => $data['sub_item_id'],
+                'sub_item_id'      => $subItem->id,
                 'code_unit'        => $codeUnit,
                 'qrcode'           => $filename,
                 'description'      => $data['description'],
@@ -85,9 +101,57 @@ class UnitItemService
     public function updateUnitItem(UnitItem $unitItem, array $data)
     {
         try {
+            if (isset($data['item_id']) && isset($data['merk'])) {
+                $subItem = SubItem::with('major')
+                    ->where('item_id', $data['item_id'])
+                    ->where(function ($query) use ($data) {
+                        $query->whereRaw("LOWER(REPLACE(merk, ' ', '')) = ?", [
+                            strtolower(str_replace(' ', '', $data['merk']))
+                        ]);
+                    })->first();
+
+                if (!$subItem) {
+                    $newSubItem = SubItem::create([
+                        'merk' => $data['merk'],
+                        'item_id' => $data['item_id'],
+                        'major_id' => Auth::user()->major_id,
+                    ]);
+
+                    $subItem = $newSubItem;
+                }
+
+                if ($unitItem->sub_item_id != $subItem->id) {
+                    if ($unitItem->qrcode && Storage::disk('public')->exists($unitItem->qrcode)) {
+                        Storage::disk('public')->delete($unitItem->qrcode);
+                    }
+
+                    $lastUnitItem = UnitItem::where('sub_item_id', $subItem->id)
+                        ->orderBy('id', 'desc')
+                        ->first();
+
+                    $sequenceNumber = $lastUnitItem ?
+                        intval(substr($lastUnitItem->code_unit, -3)) + 1 : 1;
+
+                    $codeUnit = $this->generateCodeUnit($subItem, $sequenceNumber);
+
+                    $filename = 'qrcodes/' . time() . '-' . Str::slug($codeUnit) . '.svg';
+
+                    $qrcodeImage = QrCode::format('svg')
+                        ->size(300)
+                        ->generate($codeUnit);
+
+                    Storage::disk('public')->put($filename, $qrcodeImage);
+
+                    $data['sub_item_id'] = $subItem->id;
+                    $data['code_unit'] = $codeUnit;
+                    $data['qrcode'] = $filename;
+                }
+            }
+
             $unitItem->update([
                 'sub_item_id' => $data['sub_item_id'] ?? $unitItem->sub_item_id,
-                // 'code_unit' => $data['code_unit'] ?? $unitItem->code_unit,
+                'code_unit' => $data['code_unit'] ?? $unitItem->code_unit,
+                'qrcode' => $data['qrcode'] ?? $unitItem->qrcode,
                 'description' => $data['description'] ?? $unitItem->description,
                 'procurement_date' => $data['procurement_date'] ?? $unitItem->procurement_date,
                 'status' => $data['status'] ?? $unitItem->status,
@@ -101,3 +165,4 @@ class UnitItemService
         }
     }
 }
+

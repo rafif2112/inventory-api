@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('item_id')->constrained('items')->onDelete('cascade');
             $table->string('merk');
-            $table->integer('stock');
-            $table->string('unit');
+            $table->integer('stock')->nullable();
+            $table->string('unit')->nullable();
             $table->unsignedBigInteger('major_id')->nullable();
             $table->timestamps();
         });

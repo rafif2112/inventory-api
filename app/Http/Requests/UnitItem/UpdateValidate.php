@@ -25,13 +25,15 @@ class UpdateValidate extends FormRequest
         $unitItemId = $unitItem ? $unitItem->id : null;
 
         return [
-            'sub_item_id' => 'nullable|uuid|exists:sub_items,id',
+            // 'sub_item_id' => 'nullable|uuid|exists:sub_items,id',
             // 'code_unit' => 'nullable|string|unique:unit_items,code_unit',
+
+            'merk' => 'nullable|string',
+            'item_id' => 'nullable|uuid|exists:items,id',
             'description' => 'nullable|string',
             'procurement_date' => 'nullable|date',
             'status' => 'nullable|boolean',
             'condition' => 'nullable|boolean',
-            // qrcode tidak divalidasi karena akan diisi otomatis
         ];
     }
 }
