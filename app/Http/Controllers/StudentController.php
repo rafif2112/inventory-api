@@ -38,8 +38,9 @@ class StudentController extends Controller
     public function getStudentData(Request $request)
     {
         $search = $request->query('search', '');
+        $sortMajor = $request->query('sort_major');
         $page = $request->query('page', 1);
-        $data = $this->studentService->getStudentData($search, $page);
+        $data = $this->studentService->getStudentData($search, $sortMajor, $page);
 
         return response()->json([
             'status' => 200,

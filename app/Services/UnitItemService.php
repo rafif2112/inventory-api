@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\UnitItem;
 use App\Models\SubItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -34,7 +35,7 @@ class UnitItemService
         $majorCode = strtoupper($subItem->major->name ?? 'UNK');
 
         $words = explode(' ', $subItem->merk);
-        $merkCode = strtoupper(substr($words[0], 0, 3));
+        $merkCode = strtoupper(substr($words[0], 0, 4));
 
         $sequence = str_pad($number, 3, '0', STR_PAD_LEFT);
 
@@ -45,9 +46,27 @@ class UnitItemService
     {
 
         try {
-            $subItem = SubItem::with('major')->find($data['sub_item_id']);
+            // dd($data);
+            $subItem = SubItem::with('major')
+                ->where('item_id', $data['item_id'])
+                ->where(function ($query) use ($data) {
+                    $query->whereRaw("LOWER(REPLACE(merk, ' ', '')) = ?", [
+                        strtolower(str_replace(' ', '', $data['merk']))
+                    ]);
+                })->first();
 
-            $lastUnitItem = UnitItem::where('sub_item_id', $data['sub_item_id'])
+            // dd($subItem);
+            if (!$subItem) {
+                $newSubItem = SubItem::create([
+                    'merk' => $data['merk'],
+                    'item_id' => $data['item_id'],
+                    'major_id' => Auth::user()->major_id,
+                ]);
+
+                $subItem = $newSubItem;
+            }
+
+            $lastUnitItem = UnitItem::where('sub_item_id', $subItem->id)
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -62,11 +81,10 @@ class UnitItemService
                 ->size(300)
                 ->generate($codeUnit);
 
-            // Simpan file ke storage/app/public/qrcodes/
             Storage::disk('public')->put($filename, $qrcodeImage);
 
             $newUnitItem = UnitItem::create([
-                'sub_item_id'      => $data['sub_item_id'],
+                'sub_item_id'      => $subItem->id,
                 'code_unit'        => $codeUnit,
                 'qrcode'           => $filename,
                 'description'      => $data['description'],

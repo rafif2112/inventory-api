@@ -22,8 +22,11 @@ class StoreValidate extends FormRequest
     public function rules(): array
     {
         return [
-            'sub_item_id' => 'required|uuid|exists:sub_items,id',
+            // 'sub_item_id' => 'required|uuid|exists:sub_items,id',
             // 'code_unit' => 'required|string|unique:unit_items,code_unit',
+
+            'merk' => 'string|required',
+            'item_id' => 'nullable|uuid|exists:items,id',
             'description' => 'nullable|string',
             'procurement_date' => 'required|date',
             'status' => 'sometimes|boolean',
