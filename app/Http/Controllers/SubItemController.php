@@ -8,6 +8,7 @@ use App\Http\Requests\SubItem\StoreValidate;
 use App\Http\Requests\SubItem\UpdateValidate;
 use App\Http\Resources\SubItemResource;
 use App\Models\SubItem;
+use App\Models\UnitItem;
 
 class SubItemController extends Controller
 {
@@ -16,7 +17,12 @@ class SubItemController extends Controller
      */
     public function index()
     {
-        $data = SubItem::with(['item', 'major'])->get();
+        $data = SubItem::with(['item', 'major'])->get()->map(function ($subItem) {
+            $subItem->stock = UnitItem::where('sub_item_id', $subItem->id)->count();
+            return $subItem;
+        });
+
+        // dd($data);
 
         return response()->json([
             'status' => 200,
@@ -57,6 +63,7 @@ class SubItemController extends Controller
     public function show(SubItem $subitem)
     {
         $subitem->load(['item', 'major']);
+        $subitem->stock = UnitItem::where('sub_item_id', $subitem->id)->count();
 
         return response()->json([
             'status' => 200,
