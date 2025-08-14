@@ -20,7 +20,7 @@ class UserService
         return User::select('users.*')
             ->leftJoin('majors', 'users.major_id', '=', 'majors.id')
             ->when($search, function ($query) use ($search) {
-                return $query->where('users.name', 'like', "%{$search}%");
+                return $query->where('users.name', 'ilike', "%{$search}%");
             })
             ->orderBy('majors.id', $sortDir)
             ->paginate($perPage);

@@ -117,6 +117,7 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
+        DB::beginTransaction();
         try {
             if (!$student) {
                 return response()->json([
@@ -127,15 +128,37 @@ class StudentController extends Controller
 
             $this->studentService->deleteStudent($student);
 
+            DB::commit();
             return response()->json([
                 'status' => 200,
                 'message' => 'data deleted successfully'
             ], 200);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'status' => 'error',
                 'message' => 'failed to delete data'
             ]);
+        }
+    }
+
+    public function resetData()
+    {
+        DB::beginTransaction();
+        try {
+            $this->studentService->resetData();
+
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Student data has been reset successfully.'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to reset student data: ' . $th->getMessage()
+            ], 500);
         }
     }
 

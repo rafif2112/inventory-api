@@ -9,35 +9,43 @@ use Illuminate\Support\Facades\Log;
 
 class StudentService
 {
-    /**
-     * Get all students with their major
-     */
     public function getAllStudents()
     {
-        $search = request()->query('search', '');
+        $search = trim(request()->query('search', ''));
 
-        // Check if there are new students in database
-        $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
-        $cacheKey = 'students_' . md5($search . $latestStudentTimestamp);
+        $studentsTimestamp = Student::max('updated_at') ?? now();
+        $dataVersion = md5($studentsTimestamp);
 
-        return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($search) {
+        $allDataCacheKey = 'students_all_' . $dataVersion;
+
+        $allStudents = Cache::remember($allDataCacheKey, now()->addHours(1), function () {
             return DB::select("
-            SELECT
-                students.*,
-                majors.id AS major_id,
-                majors.name AS major_name,
-                majors.icon,
-                majors.color
-            FROM 
-                students
-            LEFT JOIN 
-                majors ON students.major_id = majors.id
-            WHERE
-                students.nis::text LIKE CONCAT('%', ?::text, '%')
-            OR
-                students.name ILIKE CONCAT('%', ?::text, '%')
-            ", [$search, $search]);
+                SELECT
+                    students.*,
+                    majors.id AS major_id,
+                    majors.name AS major_name,
+                    majors.icon,
+                    majors.color
+                FROM 
+                    students
+                LEFT JOIN 
+                    majors ON students.major_id = majors.id
+                ORDER BY students.name ASC
+            ");
         });
+
+        if (empty($search)) {
+            return $allStudents;
+        }
+
+        $searchLower = strtolower($search);
+        $filteredResults = array_values(array_filter($allStudents, function ($student) use ($searchLower) {
+            return str_contains(strtolower($student->nis ?? ''), $searchLower) ||
+                str_contains(strtolower($student->name ?? ''), $searchLower) ||
+                str_contains(strtolower($student->rayon ?? ''), $searchLower);
+        }));
+
+        return $filteredResults;
     }
 
     public function getStudentData($search = '', $sortMajor = 'asc', $page = 1, $perPage = 10)
@@ -48,34 +56,12 @@ class StudentService
         $sortOrder = $sortMajor === 'desc' ? 'DESC' : 'ASC';
 
         $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
-        $cacheKey = 'students_data_' . md5($searchParam . $page . $sortMajor . $latestStudentTimestamp);
+        $dataVersion = md5($latestStudentTimestamp);
 
-        return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($searchParam, $perPage, $page, $sortOrder) {
+        $allDataCacheKey = 'students_all_data_' . $dataVersion . '_' . md5($sortMajor);
 
-            $totalCount = DB::select("
-            SELECT COUNT(*) as total
-            FROM
-                students
-            LEFT JOIN
-                majors ON students.major_id = majors.id
-            WHERE
-                students.nis::text LIKE CONCAT('%', ?::text, '%')
-            OR
-                students.name ILIKE CONCAT('%', ?::text, '%')
-            OR
-                students.rayon ILIKE CONCAT('%', ?::text, '%')
-        ", [$searchParam, $searchParam, $searchParam]);
-
-            $total = $totalCount[0]->total ?? 0;
-            $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
-
-            if ($page > $totalPages && $total > 0) {
-                $page = $totalPages;
-            }
-
-            $offset = ($page - 1) * $perPage;
-
-            $data = DB::select("
+        $allStudents = Cache::remember($allDataCacheKey, now()->addHours(1), function () use ($sortOrder) {
+            return DB::select("
             SELECT
                 students.*,
                 majors.id AS major_id,
@@ -86,16 +72,21 @@ class StudentService
                 students
             LEFT JOIN
                 majors ON students.major_id = majors.id
-            WHERE
-                students.nis::text LIKE CONCAT('%', ?::text, '%')
-            OR
-                students.name ILIKE CONCAT('%', ?::text, '%')
-            OR
-                students.rayon ILIKE CONCAT('%', ?::text, '%')
             ORDER BY 
                 majors.name " . $sortOrder . ", students.nis ASC
-            LIMIT ? OFFSET ?
-        ", [$searchParam, $searchParam, $searchParam, $perPage, $offset]);
+        ");
+        });
+
+        if (empty($searchParam)) {
+            $total = count($allStudents);
+            $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
+
+            if ($page > $totalPages && $total > 0) {
+                $page = $totalPages;
+            }
+
+            $offset = ($page - 1) * $perPage;
+            $data = array_slice($allStudents, $offset, $perPage);
 
             $hasData = !empty($data);
             $from = $hasData && $total > 0 ? $offset + 1 : 0;
@@ -112,7 +103,42 @@ class StudentService
                     'total' => (int) $total,
                 ]
             ];
-        });
+        }
+
+        $searchLower = strtolower($searchParam);
+        $filteredResults = array_values(array_filter($allStudents, function ($student) use ($searchLower) {
+            return str_contains(strtolower($student->nis ?? ''), $searchLower) ||
+                str_contains(strtolower($student->name ?? ''), $searchLower) ||
+                str_contains(strtolower($student->rayon ?? ''), $searchLower);
+        }));
+
+        $total = count($filteredResults);
+        $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
+
+        if ($page > $totalPages && $total > 0) {
+            $page = $totalPages;
+        }
+
+        $offset = ($page - 1) * $perPage;
+        $data = array_slice($filteredResults, $offset, $perPage);
+
+        $hasData = !empty($data);
+        $from = $hasData && $total > 0 ? $offset + 1 : 0;
+        $to = $hasData ? $offset + count($data) : 0;
+
+        $result = [
+            'data' => $data,
+            'meta' => [
+                'current_page' => (int) $page,
+                'from' => (int) $from,
+                'last_page' => (int) $totalPages,
+                'per_page' => (int) $perPage,
+                'to' => (int) $to,
+                'total' => (int) $total,
+            ]
+        ];
+
+        return $result;
     }
 
     /**
@@ -200,12 +226,24 @@ class StudentService
     private function clearStudentCache()
     {
         $cacheKeys = [
-            'students_*',
-            'students_data_*'
+            'students_all_*',
+            'students_all_data_*'
         ];
 
         foreach ($cacheKeys as $pattern) {
             Cache::flush();
+        }
+    }
+
+    public function resetData()
+    {
+        try {
+            $data = Student::truncate();
+            $this->clearStudentCache();
+
+            return $data;
+        } catch (\Throwable $th) {
+            throw new \Exception('Failed to reset student data: ' . $th->getMessage());
         }
     }
 }

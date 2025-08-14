@@ -14,30 +14,40 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class UnitItemService
 {
 
-    public function getAllUnitItems($user, $search)
+    public function getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor)
     {
-        $query = UnitItem::with('subItem', 'subItem.item');
+        $query = UnitItem::query()
+            ->select('unit_items.*')
+            ->with('subItem', 'subItem.item', 'subItem.major')
+            ->join('sub_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
+            ->join('items', 'sub_items.item_id', '=', 'items.id')
+            ->join('majors', 'sub_items.major_id', '=', 'majors.id')
+            ->when($sortCondition, function ($q) use ($sortCondition) {
+                $q->orderBy('unit_items.condition', $sortCondition);
+            })
+            ->when($sortDate, function ($q) use ($sortDate) {
+                $q->orderBy('unit_items.procurement_date', $sortDate);
+            })
+            ->when($sortType, function ($q) use ($sortType) {
+                $q->orderBy('items.name', $sortType);
+            })
+            ->when($sortMajor, function ($q) use ($sortMajor) {
+                $q->orderBy('majors.name', $sortMajor);
+            });
 
         if ($search) {
-            $query->where('code_unit', 'ILIKE', '%' . $search . '%')
-                ->orWhereHas('subItem', function ($q) use ($search) {
-                    $q->where('merk', 'ILIKE', '%' . $search . '%');
-                })
-                ->orWhereHas('subItem.item', function ($q) use ($search) {
-                    $q->where('name', 'ILIKE', '%' . $search . '%');
-                });
+            $query->where('unit_items.code_unit', 'ILIKE', '%' . $search . '%')
+                ->orWhere('sub_items.merk', 'ILIKE', '%' . $search . '%')
+                ->orWhere('items.name', 'ILIKE', '%' . $search . '%');
         }
 
         if ($user->role != 'superadmin' && !empty($user->role)) {
-            $query->whereHas('subItem', function ($q) use ($user) {
-                $q->where('major_id', $user->major_id);
-            });
+            $query->where('sub_items.major_id', $user->major_id);
         }
 
-        $data = $query->paginate(10);
-
-        return $data;
+        return $query->paginate(10);
     }
+
 
     private function generateCodeUnit($subItem, int $number): string
     {
@@ -67,6 +77,7 @@ class UnitItemService
                 $newSubItem = SubItem::create([
                     'merk' => $data['merk'],
                     'item_id' => $data['item_id'],
+                    'stock' => 1,
                     'major_id' => Auth::user()->major_id,
                 ]);
 
@@ -100,6 +111,8 @@ class UnitItemService
                 'condition' => $data['condition'] ?? true,
             ]);
 
+            $subItem->increment('stock');
+
             return $newUnitItem;
         } catch (\Throwable $e) {
             Log::error('Failed to create unit item: ' . $e->getMessage());
@@ -123,6 +136,7 @@ class UnitItemService
                     $newSubItem = SubItem::create([
                         'merk' => $data['merk'],
                         'item_id' => $data['item_id'],
+                        'stock' => 1,
                         'major_id' => Auth::user()->major_id,
                     ]);
 
