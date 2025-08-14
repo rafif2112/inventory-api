@@ -28,7 +28,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => TeacherResource::collection($data),
         ], 200);
     }
 
@@ -61,7 +61,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 201,
-            'data' => $teacher,
+            'message' => 'Teacher created successfully',
         ], 201);
     }
 
@@ -81,7 +81,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $teacherData,
+            'data' => new TeacherResource($teacherData),
         ], 200);
     }
 
@@ -108,7 +108,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $updatedTeacher,
+            'message' => 'Teacher updated successfully',
         ], 200);
     }
 

@@ -63,7 +63,7 @@ class StudentController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 201,
-                'data' => $newData,
+                'message' => 'Student created successfully',
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -101,7 +101,7 @@ class StudentController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 200,
-                'data' => $updatedStudent,
+                'message' => 'Student updated successfully',
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();

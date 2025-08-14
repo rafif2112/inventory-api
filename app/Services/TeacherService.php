@@ -34,7 +34,8 @@ class TeacherService
         $searchLower = strtolower($searchParam);
         $filteredResults = array_values(array_filter($allTeachers, function ($teacher) use ($searchLower) {
             return str_contains(strtolower($teacher->nip ?? ''), $searchLower) ||
-                str_contains(strtolower($teacher->name ?? ''), $searchLower);
+                str_contains(strtolower($teacher->name ?? ''), $searchLower) ||
+                str_contains(strtolower($teacher->telephone ?? ''), $searchLower);
         }));
 
         return $filteredResults;
@@ -89,7 +90,8 @@ class TeacherService
         $searchLower = strtolower($searchParam);
         $filteredResults = array_values(array_filter($allTeachers, function ($teacher) use ($searchLower) {
             return str_contains(strtolower($teacher->nip ?? ''), $searchLower) ||
-                str_contains(strtolower($teacher->name ?? ''), $searchLower);
+                str_contains(strtolower($teacher->name ?? ''), $searchLower) ||
+                str_contains(strtolower($teacher->telephone ?? ''), $searchLower);
         }));
 
         $total = count($filteredResults);
