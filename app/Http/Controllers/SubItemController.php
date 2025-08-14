@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\SubItem\StoreValidate;
 use App\Http\Requests\SubItem\UpdateValidate;
+use App\Http\Resources\PaginationResource;
 use App\Http\Resources\SubItemResource;
 use App\Models\SubItem;
 use App\Models\UnitItem;
@@ -27,6 +28,23 @@ class SubItemController extends Controller
         return response()->json([
             'status' => 200,
             'data' => SubItemResource::collection($data)
+        ], 200);
+    }
+
+    public function SubItemPaginate(Request $request){
+        $search = $request->query('search', '');
+
+        $data = SubItem::with(['item', 'major'])
+            ->when($search, fn($query) =>
+                $query->where('merk', 'like', "%{$search}%")
+            )
+            ->latest()
+            ->paginate(10);
+
+        return response()->json([
+            'status' => 200,
+            'data' => SubItemResource::collection($data),
+            'meta' => new PaginationResource($data),
         ], 200);
     }
 

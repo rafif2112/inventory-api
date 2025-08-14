@@ -48,7 +48,9 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/user', UserController::class);
     Route::get('/user/paginate', [UserController::class, 'indexPaginate']);
     Route::apiResource('/item', ItemController::class);
+    Route::get('/item/paginate', [ItemController::class, 'ItemPaginate']);
     Route::apiResource('/subitem', SubItemController::class);
+    Route::get('/subitem/paginate', [SubItemController::class, 'SubItemPaginate']);
     Route::apiResource('/major', MajorController::class);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
     Route::apiResource('/consumable-item', ConsumableItemController::class);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PaginationResource;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +15,35 @@ class ItemController extends Controller
     public function index()
     {
         //
+        $search = request()->query('search', '');
+
         $data = Item::select('*')
+            ->when(
+                $search,
+                fn($query) =>
+                $query->where('name', 'like', "%{$search}%")
+            )
             ->Latest()
-            ->get();
+            ->paginate(10);
+
+        return response()->json([
+            'status' => 200,
+            'data' => $data,
+        ], 200);
+    }
+
+    public function ItemPaginate(Request $request)
+    {
+        $search = request()->query('search', '');
+
+        $data = Item::select('*')
+            ->when(
+                $search,
+                fn($query) =>
+                $query->where('name', 'like', "%{$search}%")
+            )
+            ->latest()
+            ->paginate(10);
 
         return response()->json([
             'status' => 200,
