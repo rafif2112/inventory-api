@@ -71,10 +71,10 @@ class UnitItemController extends Controller
      */
     public function show(UnitItem $unitItem)
     {
-        //
+        $unitItem->load('subItem', 'subItem.item', 'subItem.major');
         return response()->json([
             'status' => 200,
-            'data' => $unitItem,
+            'data' => new UnitItemResource($unitItem),
         ], 200);
     }
 
