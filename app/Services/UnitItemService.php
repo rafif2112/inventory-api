@@ -14,10 +14,19 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class UnitItemService
 {
 
-    public function getAllUnitItems($user)
+    public function getAllUnitItems($user, $search)
     {
-
         $query = UnitItem::with('subItem', 'subItem.item');
+
+        if ($search) {
+            $query->where('code_unit', 'ILIKE', '%' . $search . '%')
+                ->orWhereHas('subItem', function ($q) use ($search) {
+                    $q->where('merk', 'ILIKE', '%' . $search . '%');
+                })
+                ->orWhereHas('subItem.item', function ($q) use ($search) {
+                    $q->where('name', 'ILIKE', '%' . $search . '%');
+                });
+        }
 
         if ($user->role != 'superadmin' && !empty($user->role)) {
             $query->whereHas('subItem', function ($q) use ($user) {
@@ -25,7 +34,7 @@ class UnitItemService
             });
         }
 
-        $data = $query->get();
+        $data = $query->paginate(10);
 
         return $data;
     }
@@ -165,4 +174,3 @@ class UnitItemService
         }
     }
 }
-

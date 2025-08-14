@@ -16,14 +16,19 @@ class SubItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = SubItem::with(['item', 'major'])->get()->map(function ($subItem) {
-            $subItem->stock = UnitItem::where('sub_item_id', $subItem->id)->count();
+        $search = $request->query('search');
+        $query = SubItem::with(['item', 'major']);
+
+        if ($search) {
+            $query->where('merk', 'ILIKE', "%{$search}%");
+        }
+
+        $data = $query->get()->map(function ($subItem) {
+            $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
             return $subItem;
         });
-
-        // dd($data);
 
         return response()->json([
             'status' => 200,
@@ -36,14 +41,14 @@ class SubItemController extends Controller
 
         $data = SubItem::with(['item', 'major'])
             ->when($search, fn($query) =>
-                $query->where('merk', 'like', "%{$search}%")
+                $query->where('merk', 'ilike', "%{$search}%")
             )
             ->latest()
             ->paginate(10);
 
         return response()->json([
             'status' => 200,
-            'data' => SubItemResource::collection($data),
+            'data' => SubItemResource::collection($data->items()),
             'meta' => new PaginationResource($data),
         ], 200);
     }
@@ -81,7 +86,7 @@ class SubItemController extends Controller
     public function show(SubItem $subitem)
     {
         $subitem->load(['item', 'major']);
-        $subitem->stock = UnitItem::where('sub_item_id', $subitem->id)->count();
+        $subitem->setAttribute('stock', UnitItem::where('sub_item_id', $subitem->id)->count());
 
         return response()->json([
             'status' => 200,

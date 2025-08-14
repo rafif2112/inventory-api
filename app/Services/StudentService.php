@@ -34,17 +34,46 @@ class StudentService
                 majors ON students.major_id = majors.id
             WHERE
                 students.nis::text LIKE CONCAT('%', ?::text, '%')
-            ", [$search]);
+            OR
+                students.name ILIKE CONCAT('%', ?::text, '%')
+            ", [$search, $search]);
         });
     }
 
-    public function getStudentData($search = '', $sortMajor = 'asc', $page = 1, $perPage = 20)
+    public function getStudentData($search = '', $sortMajor = 'asc', $page = 1, $perPage = 10)
     {
-        $offset = ($page - 1) * $perPage;
-        $cacheKey = 'students_data_' . md5($search . $page . $perPage . $sortMajor);
+        $page = max(1, (int) $page);
+        $perPage = max(1, (int) $perPage);
+        $searchParam = trim($search);
+        $sortOrder = $sortMajor === 'desc' ? 'DESC' : 'ASC';
 
-        return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($search, $perPage, $offset, $page, $sortMajor) {
-            $sortOrder = $sortMajor === 'desc' ? 'DESC' : 'ASC';
+        $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
+        $cacheKey = 'students_data_' . md5($searchParam . $page . $sortMajor . $latestStudentTimestamp);
+
+        return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($searchParam, $perPage, $page, $sortOrder) {
+
+            $totalCount = DB::select("
+            SELECT COUNT(*) as total
+            FROM
+                students
+            LEFT JOIN
+                majors ON students.major_id = majors.id
+            WHERE
+                students.nis::text LIKE CONCAT('%', ?::text, '%')
+            OR
+                students.name ILIKE CONCAT('%', ?::text, '%')
+            OR
+                students.rayon ILIKE CONCAT('%', ?::text, '%')
+        ", [$searchParam, $searchParam, $searchParam]);
+
+            $total = $totalCount[0]->total ?? 0;
+            $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
+
+            if ($page > $totalPages && $total > 0) {
+                $page = $totalPages;
+            }
+
+            $offset = ($page - 1) * $perPage;
 
             $data = DB::select("
             SELECT
@@ -66,33 +95,20 @@ class StudentService
             ORDER BY 
                 majors.name " . $sortOrder . ", students.nis ASC
             LIMIT ? OFFSET ?
-        ", [$search, $search, $search, $perPage, $offset]);
+        ", [$searchParam, $searchParam, $searchParam, $perPage, $offset]);
 
-            $totalCount = DB::select("
-            SELECT COUNT(*) as total
-            FROM
-                students
-            LEFT JOIN
-                majors ON students.major_id = majors.id
-            WHERE
-                students.nis::text LIKE CONCAT('%', ?::text, '%')
-            OR
-                students.name ILIKE CONCAT('%', ?::text, '%')
-            OR
-                students.rayon ILIKE CONCAT('%', ?::text, '%')
-        ", [$search, $search, $search]);
-
-            $total = $totalCount[0]->total ?? 0;
-            $totalPages = ceil($total / $perPage);
+            $hasData = !empty($data);
+            $from = $hasData && $total > 0 ? $offset + 1 : 0;
+            $to = $hasData ? $offset + count($data) : 0;
 
             return [
                 'data' => $data,
                 'meta' => [
                     'current_page' => (int) $page,
-                    'from' => (int) (($page - 1) * $perPage + 1),
+                    'from' => (int) $from,
                     'last_page' => (int) $totalPages,
                     'per_page' => (int) $perPage,
-                    'to' => (int) min($page * $perPage, $total),
+                    'to' => (int) $to,
                     'total' => (int) $total,
                 ]
             ];

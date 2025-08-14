@@ -42,19 +42,19 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
     Route::get('/unit-loan/history', [UnitLoanController::class, 'getLoanHistory']);
     Route::get('/student/data', [StudentController::class, 'getStudentData']);
-    Route::get('/teacher/data', [TeacherController::class, 'getTeacherData']);
+    Route::get('/teacher/data', [TeacherController::class, 'getTeachersData']);
 
     Route::apiResource('/student', StudentController::class);
-    Route::apiResource('/user', UserController::class);
     Route::get('/user/paginate', [UserController::class, 'indexPaginate']);
+    Route::apiResource('/user', UserController::class);
+    Route::get('/item/paginate', [ItemController::class, 'itemPaginate']);
     Route::apiResource('/item', ItemController::class);
-    Route::get('/item/paginate', [ItemController::class, 'ItemPaginate']);
-    Route::apiResource('/subitem', SubItemController::class);
     Route::get('/subitem/paginate', [SubItemController::class, 'SubItemPaginate']);
+    Route::apiResource('/subitem', SubItemController::class);
     Route::apiResource('/major', MajorController::class);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
     Route::apiResource('/consumable-item', ConsumableItemController::class);
-    Route::apiResource('/teacher', TeacherController::class)->only('index', 'show');
+    Route::apiResource('/teacher', TeacherController::class);
     Route::apiResource('/unit-items', UnitItemController::class);
     Route::apiResource('/unit-loan', UnitLoanController::class);
     Route::apiResource('/log-activity', LogActivityController::class)->only('index');

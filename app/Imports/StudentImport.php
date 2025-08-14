@@ -17,7 +17,7 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation
      */
     public function model(array $row)
     {
-        $majorName = explode(' ', $row['rombel'])[0] ?? null;
+        $majorName = explode(' ', $row['rombel'] ?? $row['Rombel'] ?? $row['ROMBEL'] ?? null)[0] ?? null;
         $majorId = null;
 
         if ($majorName) {
@@ -26,10 +26,10 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation
         }
 
         return Student::updateOrCreate(
-            ['nis' => $row['nis']],
+            ['nis' => $row['nis'] ?? $row['Nis'] ?? $row['NIS'] ?? null],
             [
-                'name' => $row['nama'],
-                'rayon' => $row['rayon'],
+                'name' => $row['nama'] ?? $row['Nama'] ?? $row['NAMA'] ?? null,
+                'rayon' => $row['rayon'] ?? $row['Rayon'] ?? $row['RAYON'] ?? null,
                 'major_id' => $majorId,
             ]
         );

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PaginationResource;
+use App\Http\Resources\TeacherResource;
 use App\Imports\TeacherImport;
 use App\Models\Teacher;
 use App\Services\TeacherService;
@@ -29,12 +31,18 @@ class TeacherController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function getTeachersData(Request $request)
     {
-        //
+        $search = $request->query('search', '');
+        $page = $request->query('page', 1);
+
+        $teachersData = $this->teacherService->getTeachersData($search, $page);
+
+        return response()->json([
+            'status' => 200,
+            'data' => TeacherResource::collection($teachersData['data']),
+            'meta' => new PaginationResource($teachersData['meta']),
+        ], 200);
     }
 
     /**
@@ -42,7 +50,18 @@ class TeacherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'nip' => 'required|unique:teachers,nip',
+            'nama' => 'required|string|max:255',
+            'no_telp' => 'required|string|max:20',
+        ]);
+
+        $teacher = $this->teacherService->createTeacher($validatedData);
+
+        return response()->json([
+            'status' => 201,
+            'data' => $teacher,
+        ], 201);
     }
 
     /**
@@ -78,7 +97,18 @@ class TeacherController extends Controller
      */
     public function update(Request $request, Teacher $teacher)
     {
-        //
+        $validatedData = $request->validate([
+            'nip' => 'required|unique:teachers,nip,' . $teacher->id,
+            'nama' => 'required|string|max:255',
+            'no_telp' => 'required|string|max:20',
+        ]);
+
+        $updatedTeacher = $this->teacherService->updateTeacher($teacher, $validatedData);
+
+        return response()->json([
+            'status' => 200,
+            'data' => $updatedTeacher,
+        ], 200);
     }
 
     /**
@@ -86,7 +116,12 @@ class TeacherController extends Controller
      */
     public function destroy(Teacher $teacher)
     {
-        //
+        $deleted = $this->teacherService->deleteTeacher($teacher);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Teacher deleted successfully',
+        ], 200);
     }
 
     public function import(Request $request)

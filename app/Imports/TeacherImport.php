@@ -17,10 +17,10 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
     public function model(array $row)
     {
         return Teacher::updateOrCreate(
-            ['nip' => $row['nip']],
+            ['nip' => $row['nip'] ?? $row['Nip'] ?? $row['NIP'] ?? null],
             [
-                'name' => $row['nama'],
-                'telephone' =>$row['no_telp'],
+                'name' => $row['nama'] ?? $row['Nama'] ?? $row['NAMA'] ?? null,
+                'telephone' =>$row['no_telp'] ?? $row['No_telp'] ?? $row['NO_TELP'] ?? $row['no telp'] ?? $row['No Telp'] ?? $row['NO TELP'] ?? $row['No Telphone'] ?? $row['no telphone'] ?? $row['NO TELEPHONE'] ?? $row['No Telepon'] ?? $row['no telepon'] ?? $row['NO TELEPON'] ?? null,
             ]
         );
     }

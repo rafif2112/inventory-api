@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ItemResource;
 use App\Http\Resources\PaginationResource;
 use App\Models\Item;
+use App\Services\ItemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ItemController extends Controller
 {
+    protected $itemService;
+
+    public function __construct(ItemService $itemService)
+    {
+        $this->itemService = $itemService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
         $search = request()->query('search', '');
-
-        $data = Item::select('*')
-            ->when(
-                $search,
-                fn($query) =>
-                $query->where('name', 'like', "%{$search}%")
-            )
-            ->Latest()
-            ->paginate(10);
+        $data = $this->itemService->getAllItems($search);
 
         return response()->json([
             'status' => 200,
@@ -32,22 +32,16 @@ class ItemController extends Controller
         ], 200);
     }
 
-    public function ItemPaginate(Request $request)
+    public function itemPaginate(Request $request)
     {
         $search = request()->query('search', '');
 
-        $data = Item::select('*')
-            ->when(
-                $search,
-                fn($query) =>
-                $query->where('name', 'like', "%{$search}%")
-            )
-            ->latest()
-            ->paginate(10);
+        $data = $this->itemService->getItemPaginate($search);
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => ItemResource::collection($data->items()),
+            'meta' => new PaginationResource($data)
         ], 200);
     }
 

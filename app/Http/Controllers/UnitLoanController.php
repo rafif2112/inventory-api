@@ -184,8 +184,8 @@ class UnitLoanController extends Controller
     public function getLoanHistory(Request $request)
     {
         try {
-            $sortTime = $request->query('sort-by-time', 'desc');
-            $sortType = $request->query('sort-by-type');
+            $sortTime = $request->query('sort_by_time', 'desc');
+            $sortType = $request->query('sort_by_type');
             $search = strtolower($request->query('search'));
             $data = $request->query('data');
 

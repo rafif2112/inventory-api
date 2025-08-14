@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UnitItem\StoreValidate;
 use App\Http\Requests\UnitItem\UpdateValidate;
+use App\Http\Resources\PaginationResource;
 use App\Http\Resources\UnitItemResource;
 use App\Models\UnitItem;
 use App\Services\UnitItemService;
@@ -27,11 +28,14 @@ class UnitItemController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $unitItems = $this->unitItemService->getAllUnitItems($user);
+        $search = $request->query('search');
+
+        $unitItems = $this->unitItemService->getAllUnitItems($user, $search);
 
         return response()->json([
             'status' => 200,
-            'data' => UnitItemResource::collection($unitItems),
+            'data' => UnitItemResource::collection($unitItems->items()),
+            'meta' => new PaginationResource($unitItems)
         ], 200);
     }
 
@@ -40,7 +44,6 @@ class UnitItemController extends Controller
      */
     public function store(StoreValidate $request)
     {
-        //
         $data = $request->validated();
 
         DB::beginTransaction();
@@ -99,9 +102,9 @@ class UnitItemController extends Controller
      */
     public function destroy(UnitItem $unitItem)
     {
-        //
         DB::beginTransaction();
         try {
+            $subItem = $unitItem->subItems()->where('unit_item_id', $unitItem->id);
             $unitItem->whereId($unitItem->id)->delete();
             DB::commit();
             return response()->json([
