@@ -21,11 +21,18 @@ class SubItemSeeder extends Seeder
             [
                 'item_name' => 'Laptop',
                 'data' => [
-                    ['merk' => 'Lenovo ThinkPad', 'stock' => 10, 'unit' => 'pcs', 'major_id' => 1],
-                    ['merk' => 'Asus', 'stock' => 5, 'unit' => 'pcs', 'major_id' => 1],
-                    ['merk' => 'HP', 'stock' => 8, 'unit' => 'pcs', 'major_id' => 2],
+                    ['merk' => 'Lenovo ThinkPad', 'stock' => 2, 'unit' => 'pcs', 'major_id' => 1],
+                    ['merk' => 'Asus', 'stock' => 2, 'unit' => 'pcs', 'major_id' => 5],
+                    ['merk' => 'HP', 'stock' => 1, 'unit' => 'pcs', 'major_id' => 2],
                 ]
             ],
+            [
+                'item_name' => 'Komputer',
+                'data' => [
+                    ['merk' => 'LG', 'stock' => 1, 'unit' => 'pcs', 'major_id' => 3],
+                    ['merk' => 'Samsung', 'stock' => 1, 'unit' => 'pcs', 'major_id' => 4]
+                ]
+            ]
         ];
 
         foreach ($subItems as $itemData) {

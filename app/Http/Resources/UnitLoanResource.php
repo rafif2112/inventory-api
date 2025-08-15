@@ -26,7 +26,7 @@ class UnitLoanResource extends JsonResource
             'returned_at' => $this->returned_at,
             'purpose' => $this->purpose,
             'room' => $this->room ?? '',
-            'status' => $this->status,
+            'status' => $this->status === true ? 'borrowed' : 'returned',
             'image' => $this->image,
             'guarantee' => $this->guarantee,
             'student' => new StudentResource($this->whenLoaded('student')),

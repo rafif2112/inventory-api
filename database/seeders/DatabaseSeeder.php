@@ -48,7 +48,22 @@ class DatabaseSeeder extends Seeder
             'username' => 'superadmin',
             'role' => 'superadmin',
             'password' => bcrypt('password'), // password
-            'major_id' => 1,
+        ]);
+
+        User::create([
+            'name' => 'Kaprog PPLG',
+            'username' => 'kaprogpplg',
+            'role' => 'admin',
+            'password' => bcrypt('password'),
+            'major_id' => 1
+        ]);
+
+        User::create([
+            'name' => 'Kepala Lab PPLG',
+            'username' => 'labpplg',
+            'role' => 'user',
+            'password' => bcrypt('password'),
+            'major_id' => 1
         ]);
 
         $this->call([

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->datetime('borrowed_at');
             $table->datetime('returned_at')->nullable();
             $table->text('purpose');
-            $table->integer('room');
+            $table->integer('room')->nullable();
             $table->boolean('status')->default(true); // true for borrowed, false for returned
             $table->string('image')->nullable();
             $table->enum('guarantee', ['BKP', 'kartu pelajar'])->default('kartu pelajar')->nullable();
