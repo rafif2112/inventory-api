@@ -70,6 +70,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'username' => $user->username,
                 'role' => $user->role,
+                'major_id' => $user->major_id,
             ],
             'token' => $user->createToken('wikventory')->accessToken,
         ], 200);
