@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\StoreValidate;
 use App\Http\Requests\User\UpdateValidate;
+use App\Http\Resources\PaginationResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => UserResource::collection($data),
         ], 200);
     }
 
@@ -42,15 +44,8 @@ class UserController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'Users retrieved successfully',
-            'data' => $users,
-            'meta' => [
-                'current_page' => $users->currentPage(),
-                'from' => $users->firstItem(),
-                'last_page' => $users->lastPage(),
-                'per_page' => $users->perPage(),
-                'to' => $users->lastItem(),
-                'total' => $users->total(),
-            ]
+            'data' => UserResource::collection($users->items()),
+            'meta' => new PaginationResource($users)
         ]);
     }
 

@@ -8,6 +8,7 @@ use App\Imports\TeacherImport;
 use App\Models\Teacher;
 use App\Services\TeacherService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TeacherController extends Controller
@@ -27,7 +28,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => TeacherResource::collection($data),
         ], 200);
     }
 
@@ -60,7 +61,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 201,
-            'data' => $teacher,
+            'message' => 'Teacher created successfully',
         ], 201);
     }
 
@@ -80,7 +81,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $teacherData,
+            'data' => new TeacherResource($teacherData),
         ], 200);
     }
 
@@ -107,7 +108,7 @@ class TeacherController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $updatedTeacher,
+            'message' => 'Teacher updated successfully',
         ], 200);
     }
 
@@ -122,6 +123,26 @@ class TeacherController extends Controller
             'status' => 200,
             'message' => 'Teacher deleted successfully',
         ], 200);
+    }
+
+    public function resetData()
+    {
+        DB::beginTransaction();
+        try {
+            $this->teacherService->resetTeachersData();
+
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Teacher data reset successfully',
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to reset teacher data: ' . $th->getMessage(),
+            ], 500);
+        }
     }
 
     public function import(Request $request)

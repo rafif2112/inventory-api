@@ -81,22 +81,20 @@ class UnitLoanService
                 $unitLoan = UnitLoan::create($loanData);
 
                 if ($request && $request->image) {
-                    $image = $request->image;
-                    if (preg_match('/^data:image\/(\w+);base64,/', $image, $type)) {
-                        $format = strtolower($type[1]);
-
-                        if (!in_array($format, ['jpg', 'jpeg', 'png', 'webp'])) {
-                            throw new \Exception('Invalid image format');
-                        }
-                        $image = preg_replace('/^data:image\/\w+;base64,/', '', $image);
-                        $image = str_replace(' ', '+', $image);
-                        $filename = 'unit_loans/' . time() . '-' . $unitLoan->id . '.' . $format;
-                        Storage::disk('local')->put($filename, base64_decode($image));
-                        $unitLoan->image = $filename;
-                        $unitLoan->save();
-                    } else {
-                        throw new \Exception('Invalid base64 string');
+                    if ($unitLoan->image) {
+                        Storage::disk('local')->delete($unitLoan->image);
                     }
+
+                    $file = $request->image;
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $path = 'unit-loan';
+
+                    Storage::disk('public')->makeDirectory($path);
+                    $relativePath = $path . '/' . $filename;
+                    Storage::disk('public')->put($relativePath, file_get_contents($file));
+
+                    $unitLoan->image = $relativePath;
+                    $unitLoan->save();
                 }
 
                 $unitItem->status = false;
@@ -142,27 +140,20 @@ class UnitLoanService
             $unitLoan->update($updateData);
 
             if ($request && $request->image) {
-                // Delete existing image first if it exists
                 if ($unitLoan->image) {
                     Storage::disk('local')->delete($unitLoan->image);
                 }
 
-                $image = $request->image;
-                if (preg_match('/^data:image\/(\w+);base64,/', $image, $type)) {
-                    $format = strtolower($type[1]);
-                    if (!in_array($format, ['jpg', 'jpeg', 'png', 'webp'])) {
-                        throw new \Exception('Invalid image format');
-                    }
-                    $image = preg_replace('/^data:image\/\w+;base64,/', '', $image);
-                    $image = str_replace(' ', '+', $image);
-                    $filename = 'unit_loans/' . time() . '-' . $unitLoan->id . '.' . $format;
+                $file = $request->image;
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = 'unit-loan';
 
-                    Storage::disk('local')->put($filename, base64_decode($image));
-                    $unitLoan->image = $filename;
-                    $unitLoan->save();
-                } else {
-                    throw new \Exception('Invalid base64 string');
-                }
+                Storage::disk('public')->makeDirectory($path);
+                $relativePath = $path . '/' . $filename;
+                Storage::disk('public')->put($relativePath, file_get_contents($file));
+
+                $unitLoan->image = $relativePath;
+                $unitLoan->save();
             }
 
             if ($data['returned_at']) {

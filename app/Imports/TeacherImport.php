@@ -20,7 +20,7 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
             ['nip' => $row['nip'] ?? $row['Nip'] ?? $row['NIP'] ?? null],
             [
                 'name' => $row['nama'] ?? $row['Nama'] ?? $row['NAMA'] ?? null,
-                'telephone' =>$row['no_telp'] ?? $row['No_telp'] ?? $row['NO_TELP'] ?? $row['no telp'] ?? $row['No Telp'] ?? $row['NO TELP'] ?? $row['No Telphone'] ?? $row['no telphone'] ?? $row['NO TELEPHONE'] ?? $row['No Telepon'] ?? $row['no telepon'] ?? $row['NO TELEPON'] ?? null,
+                'telephone' => $row['no_telepon'] ?? $row['No_Telepon'] ?? $row['NO_TELEPON'] ?? null,
             ]
         );
     }
@@ -30,7 +30,7 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
         return [
             'nip' => 'required',
             'nama' => 'required',
-            'no_telp' => 'required',
+            'no_telepon' => 'required',
         ];
     }
 
@@ -39,7 +39,7 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
         return [
             'nip.required' => 'NIP field is required',
             'nama.required' => 'Name field is required',
-            'no_telp.required' => 'Telephone field is required',
+            'no_telepon.required' => 'No Telepon field is required',
         ];
     }
 }

@@ -29,8 +29,12 @@ class UnitItemController extends Controller
     {
         $user = Auth::user();
         $search = $request->query('search');
+        $sortDate = $request->query('sort_date');
+        $sortType = $request->query('sort_type');
+        $sortCondition = $request->query('sort_condition');
+        $sortMajor = $request->query('sort_major');
 
-        $unitItems = $this->unitItemService->getAllUnitItems($user, $search);
+        $unitItems = $this->unitItemService->getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor);
 
         return response()->json([
             'status' => 200,
@@ -67,10 +71,10 @@ class UnitItemController extends Controller
      */
     public function show(UnitItem $unitItem)
     {
-        //
+        $unitItem->load('subItem', 'subItem.item', 'subItem.major');
         return response()->json([
             'status' => 200,
-            'data' => $unitItem,
+            'data' => new UnitItemResource($unitItem),
         ], 200);
     }
 
@@ -104,8 +108,14 @@ class UnitItemController extends Controller
     {
         DB::beginTransaction();
         try {
-            $subItem = $unitItem->subItems()->where('unit_item_id', $unitItem->id);
+            $subItem = $unitItem->subItem;
+
+            if ($subItem) {
+                $subItem->decrement('stock');
+            }
+
             $unitItem->whereId($unitItem->id)->delete();
+
             DB::commit();
             return response()->json([
                 'status' => 200,

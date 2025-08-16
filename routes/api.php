@@ -34,28 +34,38 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/user', [AuthController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/student/import', [StudentController::class, 'import']);
-    Route::post('/teachers-import', [TeacherController::class, 'import']);
-    Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
-    Route::get('/unit-loan/history', [UnitLoanController::class, 'getLoanHistory']);
     Route::get('/student/data', [StudentController::class, 'getStudentData']);
-    Route::get('/teacher/data', [TeacherController::class, 'getTeachersData']);
-
+    Route::delete('/student/reset', [StudentController::class, 'resetData']);
     Route::apiResource('/student', StudentController::class);
+
     Route::get('/user/paginate', [UserController::class, 'indexPaginate']);
     Route::apiResource('/user', UserController::class);
+    
     Route::get('/item/paginate', [ItemController::class, 'itemPaginate']);
     Route::apiResource('/item', ItemController::class);
+    
     Route::get('/subitem/paginate', [SubItemController::class, 'SubItemPaginate']);
     Route::apiResource('/subitem', SubItemController::class);
+    
     Route::apiResource('/major', MajorController::class);
+    
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
+    
     Route::apiResource('/consumable-item', ConsumableItemController::class);
+    
+    Route::post('/teacher/import', [TeacherController::class, 'import']);
+    Route::get('/teacher/data', [TeacherController::class, 'getTeachersData']);
+    Route::delete('/teacher/reset', [TeacherController::class, 'resetData']);
     Route::apiResource('/teacher', TeacherController::class);
+    
     Route::apiResource('/unit-items', UnitItemController::class);
+    
+    Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
+    Route::get('/unit-loan/history', [UnitLoanController::class, 'getLoanHistory']);
     Route::apiResource('/unit-loan', UnitLoanController::class);
+    
     Route::apiResource('/log-activity', LogActivityController::class)->only('index');
 });
