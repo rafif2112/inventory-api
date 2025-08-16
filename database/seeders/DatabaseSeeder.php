@@ -16,38 +16,38 @@ class DatabaseSeeder extends Seeder
     {
         Major::create([
             'name' => 'PPLG',
-            'color' => '#FF5733',
+            'color' => '#A2C5FF',
         ]);
         Major::create([
             'name' => 'DKV',
-            'color' => '#3357FF',
+            'color' => '#FFD6A1',
         ]);
         Major::create([
             'name' => 'TJKT',
-            'color' => '#FF33A1',
+            'color' => '#FFF3A4',
         ]);
         Major::create([
             'name' => 'MPLB',
-            'color' => '#FFB833',
+            'color' => '#FF484B',
         ]);
         Major::create([
             'name' => 'KLN',
-            'color' => '#33FFA1',
+            'color' => '#D967CA',
         ]);
         Major::create([
             'name' => 'HTL',
-            'color' => '#A133FF',
+            'color' => '#42A531',
         ]);
         Major::create([
             'name' => 'PMN',
-            'color' => '#FF5733',
+            'color' => '#877E31',
         ]);
 
         User::create([
             'name' => 'Super Admin',
             'username' => 'superadmin',
             'role' => 'superadmin',
-            'password' => bcrypt('password'), // password
+            'password' => bcrypt('password'),
         ]);
 
         User::create([

@@ -30,7 +30,7 @@ class StudentService
                     students
                 LEFT JOIN 
                     majors ON students.major_id = majors.id
-                ORDER BY students.name ASC
+                ORDER BY students.nis ASC
             ");
         });
 
@@ -48,7 +48,7 @@ class StudentService
         return $filteredResults;
     }
 
-    public function getStudentData($search = '', $sortMajor = 'asc', $page = 1, $perPage = 10)
+    public function getStudentData($search = '', $sortMajor, $page = 1, $perPage = 10)
     {
         $page = max(1, (int) $page);
         $perPage = max(1, (int) $perPage);
@@ -73,7 +73,7 @@ class StudentService
             LEFT JOIN
                 majors ON students.major_id = majors.id
             ORDER BY 
-                majors.name " . $sortOrder . ", students.nis ASC
+                students.nis ASC
         ");
         });
 

@@ -17,7 +17,8 @@ class UserService
     {
         $sortDir = in_array(strtolower($sortDir), ['asc', 'desc']) ? $sortDir : 'asc';
 
-        return User::select('users.*')
+        return User::with('major')
+            ->select('users.*')
             ->leftJoin('majors', 'users.major_id', '=', 'majors.id')
             ->when($search, function ($query) use ($search) {
                 return $query->where('users.name', 'ilike', "%{$search}%");
