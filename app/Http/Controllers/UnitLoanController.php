@@ -81,7 +81,7 @@ class UnitLoanController extends Controller
         DB::beginTransaction();
         try {
             $validated = $request->validated();
-            
+
             $unitLoan = $this->unitLoanService->createUnitLoan($validated, $request);
 
             $unitLoan->load(['student', 'teacher', 'unitItem']);
@@ -89,6 +89,7 @@ class UnitLoanController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 200,
+                'message' => 'Unit loan created successfully',
                 'data' => new UnitLoanResource($unitLoan),
             ], 200);
         } catch (\Exception $e) {
@@ -128,7 +129,7 @@ class UnitLoanController extends Controller
         DB::beginTransaction();
         try {
             $validated = $request->validated();
-            
+
             $unitLoan = UnitLoan::find($id);
             if (!$unitLoan) {
                 return response()->json([
