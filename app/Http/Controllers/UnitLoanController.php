@@ -45,7 +45,7 @@ class UnitLoanController extends Controller
                 'code_unit' => 'required|string|exists:unit_items,code_unit',
             ]);
 
-            $result = $this->unitLoanService->getLoanByUnitCode($request->code_unit);
+            $result = $this->unitLoanService->getLoanByUnitCode($request->code_unit);   
 
             if (!$result['found']) {
                 return response()->json([
@@ -57,12 +57,14 @@ class UnitLoanController extends Controller
             if (!$result['is_borrowed']) {
                 return response()->json([
                     'status' => 200,
+                    'is_borrowed' => false,
                     'data' => new UnitItemResource($result['data']),
                 ], 200);
             }
 
             return response()->json([
                 'status' => 200,
+                'is_borrowed' => true,
                 'data' => new IsBorrowedResource($result['data'])
             ], 200);
         } catch (\Exception $e) {
@@ -116,7 +118,7 @@ class UnitLoanController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $unitLoan
+            'data' => new UnitLoanResource($unitLoan)
         ], 200);
     }
 

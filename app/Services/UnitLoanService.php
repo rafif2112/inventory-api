@@ -113,7 +113,7 @@ class UnitLoanService
      */
     public function getUnitLoanById($id)
     {
-        return UnitLoan::with(['student', 'teacher', 'unitItem'])->find($id);
+        return UnitLoan::with(['student', 'student.major', 'teacher', 'unitItem', 'unitItem.subItem', 'unitItem.subItem.item'])->find($id);
     }
 
     /**
@@ -127,7 +127,7 @@ class UnitLoanService
 
             $updateData = [
                 'student_id' => $data['student_id'] ?? $unitLoan->student_id,
-                'teacher_id' => $data['teacher_id'] ?? $unitLoan->teacher_id,
+                'teacher_id' => $data['teacher_id'] ?? $unitLoan->teacher_id,   
                 'borrowed_by' => $data['borrowed_by'] ?? $unitLoan->borrowed_by,
                 'borrowed_at' => $data['borrowed_at'] ?? $unitLoan->borrowed_at,
                 'returned_at' => $data['returned_at'] ?? $unitLoan->returned_at,
@@ -184,7 +184,7 @@ class UnitLoanService
 
     public function getLoanHistory($sortTime, $sortType, $search, $data)
     {
-        $query = UnitLoan::with(['unitItem', 'student', 'teacher', 'unitItem.subItem', 'unitItem.subItem.item'])
+        $query = UnitLoan::with(['unitItem', 'student', 'student.major', 'teacher', 'unitItem.subItem', 'unitItem.subItem.item'])
             ->orderBy('borrowed_at', $sortTime === 'asc' ? 'asc' : 'desc')
             ->when($data === 'returning', function ($query) {
                 return $query->where('status', false);
