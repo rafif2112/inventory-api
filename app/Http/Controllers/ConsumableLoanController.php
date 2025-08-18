@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ConsumableLoan\StoreValidate;
 use App\Http\Requests\ConsumableLoan\UpdateValidate;
+use App\Http\Resources\ConsumableLoanResource;
+use App\Http\Resources\PaginationResource;
 use App\Models\ConsumableLoan;
 use App\Services\ConsumableLoanService;
 use Illuminate\Http\Request;
@@ -31,6 +33,28 @@ class ConsumableLoanController extends Controller
         ], 200);
     }
 
+    public function getConsumableLoanHistory(Request $request)
+    {
+        try {
+            $sortQuantity = $request->query('sort_quantity', 'asc');
+            $sortType = $request->query('sort_type', 'asc');
+            $search = $request->query('search', '');
+
+            $data = $this->consumableLoanService->getConsumableLoanHistory($search, $sortQuantity, $sortType);
+
+            return response()->json([
+                'status' => 200,
+                'data' => ConsumableLoanResource::collection($data),
+                'meta' => new PaginationResource($data)
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Display the specified resource.
      */
@@ -50,11 +74,11 @@ class ConsumableLoanController extends Controller
     public function store(StoreValidate $request)
     {
         $data = $request->validated();
-        
+
         DB::beginTransaction();
         try {
             $newData = $this->consumableLoanService->createConsumableLoan($data);
-            
+
             DB::commit();
             return response()->json([
                 'status' => 201,

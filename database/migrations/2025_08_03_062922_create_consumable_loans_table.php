@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('consumable_loans', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
-            $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignUuid('student_id')->nullable()->constrained('students')->onDelete('cascade');
+            $table->foreignUuid('teacher_id')->nullable()->constrained('teachers')->onDelete('cascade');
             $table->foreignUuid('consumable_item_id')->constrained('consumable_items')->onDelete('cascade');
             $table->integer('quantity');
             $table->text('purpose')->nullable();

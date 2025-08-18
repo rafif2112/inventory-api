@@ -52,6 +52,7 @@ Route::middleware('auth:api')->group(function () {
     
     Route::apiResource('/major', MajorController::class);
     
+    Route::get('/consumable-loan/history', [ConsumableLoanController::class, 'getConsumableLoanHistory']);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
 
     Route::get('/consumable-item/data', [ConsumableItemController::class, 'getData']);
