@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UnitLoan\StoreValidate;
 use App\Http\Requests\UnitLoan\UpdateValidate;
 use App\Http\Resources\CheckLoan\IsBorrowedResource;
+use App\Http\Resources\PaginationResource;
 use App\Http\Resources\UnitItemResource;
 use App\Http\Resources\UnitLoanResource;
 use App\Models\UnitLoan;
@@ -190,13 +191,15 @@ class UnitLoanController extends Controller
             $sortTime = $request->query('sort_by_time', 'desc');
             $sortType = $request->query('sort_by_type');
             $search = strtolower($request->query('search'));
+            $page = $request->query('page', 1);
             $data = $request->query('data');
 
-            $history = $this->unitLoanService->getLoanHistory($sortTime, $sortType, $search, $data);
+            $history = $this->unitLoanService->getLoanHistory($sortTime, $sortType, $search, $data, $page);
 
             return response()->json([
                 'status' => 200,
-                'data' => UnitLoanResource::collection($history)
+                'data' => UnitLoanResource::collection($history),
+                'meta' => new PaginationResource($history)
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([

@@ -53,7 +53,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/major', MajorController::class);
     
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
-    
+
+    Route::get('/consumable-item/data', [ConsumableItemController::class, 'getData']);
     Route::apiResource('/consumable-item', ConsumableItemController::class);
     
     Route::post('/teacher/import', [TeacherController::class, 'import']);

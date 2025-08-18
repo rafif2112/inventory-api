@@ -63,7 +63,6 @@ class UnitItemService
 
     public function storeUnitItem(array $data)
     {
-
         try {
             $subItem = SubItem::with('major')
                 ->where('item_id', $data['item_id'])
@@ -84,7 +83,13 @@ class UnitItemService
                 $subItem = $newSubItem;
             }
 
-            $lastUnitItem = UnitItem::where('sub_item_id', $subItem->id)
+            $similarSubItems = SubItem::where('item_id', $data['item_id'])
+                ->whereRaw("LOWER(REPLACE(merk, ' ', '')) LIKE ?", [
+                    strtolower(str_replace(' ', '', $data['merk'])) . '%'
+                ])
+                ->pluck('id');
+
+            $lastUnitItem = UnitItem::whereIn('sub_item_id', $similarSubItems)
                 ->orderBy('id', 'desc')
                 ->first();
 

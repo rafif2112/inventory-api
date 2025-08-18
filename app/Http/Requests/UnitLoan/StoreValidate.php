@@ -27,7 +27,6 @@ class StoreValidate extends FormRequest
             'unit_item_id'  => 'required|uuid|exists:unit_items,id',
             'borrowed_by'   => 'required|string',
             'borrowed_at'   => 'required|date',
-            // 'returned_at'   => 'nullable|date',
             'purpose'       => 'required|string',
             'room'          => 'required_without:student_id',
             'image'         => 'nullable|image|max:2048',

@@ -73,9 +73,9 @@ class UnitLoanService
                     'borrowed_by' => $data['borrowed_by'],
                     'borrowed_at' => $data['borrowed_at'],
                     'purpose' => $data['purpose'],
-                    'room' => $data['room'],
+                    'room' => $data['room'] ?? null,
                     'status' => true,
-                    'guarantee' => $data['guarantee'],
+                    'guarantee' => $data['guarantee'] ?? null,
                 ];
 
                 $unitLoan = UnitLoan::create($loanData);
@@ -182,54 +182,39 @@ class UnitLoanService
         }
     }
 
-    public function getLoanHistory($sortTime, $sortType, $search, $data)
+    public function getLoanHistory($sortTime, $sortType, $search, $data, $page = 1, $perPage = 10)
     {
-        $query = UnitLoan::with(['unitItem', 'student', 'student.major', 'teacher', 'unitItem.subItem', 'unitItem.subItem.item'])
-            ->orderBy('borrowed_at', $sortTime === 'asc' ? 'asc' : 'desc')
-            ->when($data === 'returning', function ($query) {
-                return $query->where('status', false);
-            }, function ($query) {
-                return $query->where('status', true);
+        $query = UnitLoan::query()
+            ->select('unit_loans.*')
+            ->with(['unitItem', 'student', 'student.major', 'teacher', 'unitItem.subItem', 'unitItem.subItem.item'])
+            ->join('unit_items', 'unit_loans.unit_item_id', '=', 'unit_items.id')
+            ->join('sub_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
+            ->join('items', 'sub_items.item_id', '=', 'items.id')
+            ->join('majors', 'sub_items.major_id', '=', 'majors.id')
+            ->leftJoin('students', 'unit_loans.student_id', '=', 'students.id')
+            ->leftJoin('teachers', 'unit_loans.teacher_id', '=', 'teachers.id')
+            ->when($data === 'returning', function ($q) {
+                $q->where('unit_loans.status', false);
+            }, function ($q) {
+                $q->where('unit_loans.status', true);
+            })
+            ->when($sortType, function ($q) use ($sortType) {
+                $q->orderBy('items.name', $sortType);
+            })
+            ->when($sortTime, function ($q) use ($sortTime) {
+                $q->orderBy('unit_loans.borrowed_at', $sortTime);
             });
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
-                $q->whereHas('unitItem.subItem.item', function ($subQuery) use ($search) {
-                    $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
-                })
-                    ->orWhereHas('student', function ($subQuery) use ($search) {
-                        $subQuery->whereRaw('LOWER(name) LIKE ? OR nis::text LIKE ?', [
-                            '%' . strtolower($search) . '%',
-                            '%' . $search . '%'
-                        ]);
-                    })
-                    ->orWhereHas('teacher', function ($subQuery) use ($search) {
-                        $subQuery->whereRaw('nip::text LIKE ? OR LOWER(name) LIKE ?', [
-                            '%' . $search . '%',
-                            '%' . strtolower($search) . '%'
-                        ]);
-                    })
-                    ->orWhereHas('unitItem', function ($subQuery) use ($search) {
-                        $subQuery->whereRaw('LOWER(code_unit) LIKE ?', ['%' . strtolower($search) . '%']);
-                    })
-                    ->orWhereHas('unitItem.subItem', function ($subQuery) use ($search) {
-                        $subQuery->whereRaw('LOWER(merk) LIKE ?', ['%' . strtolower($search) . '%']);
-                    });
+                $q->where('unit_items.code_unit', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('sub_items.merk', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('items.name', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('students.name', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('teachers.name', 'ILIKE', '%' . $search . '%');
             });
         }
 
-        $loans = $query->get();
-
-        if (!empty($sortType)) {
-            $loans = $loans->sortBy(function ($loan) {
-                return strtolower($loan->unitItem->subItem->item->name ?? '');
-            });
-            if (strtolower($sortType) === 'desc') {
-                $loans = $loans->reverse();
-            }
-            $loans = $loans->values();
-        }
-
-        return $loans;
+        return $query->paginate($perPage);
     }
 }
