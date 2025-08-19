@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Superadmin;
 
+use App\Models\UnitLoan;
+use App\Models\Major;
+use App\Models\ConsumableLoan;
+
+
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Superadmin\CountTotalLoansResource;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -10,9 +16,11 @@ class DashboardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function getMajorLoans()
     {
-        //
+        $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
+
+        return CountTotalLoansResource::collection($majors);
     }
 
     /**

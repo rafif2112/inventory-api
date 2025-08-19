@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminUser\DashboardController as AdminUserDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SubItemController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\Superadmin\DashboardController;
 use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -81,4 +83,5 @@ Route::middleware('auth:api')->group(function () {
         Route::post('consumable-items', 'exportConsumableItems');
     });
 
+    Route::get('/major-loans', [DashboardController::class, 'getMajorLoans']);
 });

@@ -38,5 +38,10 @@ class UnitLoan extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');
-    }   
+    }
+
+    public function major()
+    {
+        return $this->hasOneThrough(Major::class, UnitItem::class, 'unit_item_id', 'major_id');
+    }
 }
