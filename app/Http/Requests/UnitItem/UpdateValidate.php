@@ -21,14 +21,19 @@ class UpdateValidate extends FormRequest
      */
     public function rules(): array
     {
+        $unitItem = $this->route('unit-items');
+        $unitItemId = $unitItem ? $unitItem->id : null;
+
         return [
-            'sub_item_id' => 'required|uuid|exists:sub_items,id',
-            'code_unit' => 'required|string|unique:unit_items,code_unit,' . $this->route('unit-item')->id,
+            // 'sub_item_id' => 'nullable|uuid|exists:sub_items,id',
+            // 'code_unit' => 'nullable|string|unique:unit_items,code_unit',
+
+            'merk' => 'nullable|string',
+            'item_id' => 'nullable|uuid|exists:items,id',
             'description' => 'nullable|string',
-            'procurement_date' => 'required|date',
-            'status' => 'sometimes|boolean',
-            'condition' => 'sometimes|boolean',
-            // barcode tidak divalidasi karena akan diisi otomatis
+            'procurement_date' => 'nullable|date',
+            'status' => 'nullable|boolean',
+            'condition' => 'nullable|boolean',
         ];
     }
 }

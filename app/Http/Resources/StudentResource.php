@@ -14,22 +14,30 @@ class StudentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // return parent::toArray($request);
+        if (is_object($this->resource) && property_exists($this->resource, 'major_name')) {
+            // Raw query result
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'nis' => $this->nis,
+                'rayon' => $this->rayon,
+                'major_id' => $this->major_id,
+                'major' => $this->major_id ? [
+                    'id' => $this->major_id,
+                    'name' => $this->major_name,
+                    'icon' => $this->icon,
+                    'color' => $this->color,
+                ] : null,
+            ];
+        }
 
-        $arr = [
+        return [
             'id' => $this->id,
             'name' => $this->name,
             'nis' => $this->nis,
             'rayon' => $this->rayon,
             'major_id' => $this->major_id,
-            'major' => [
-                'id' => $this->major_id,
-                'name' => $this->major_name,
-                'icon' => $this->icon,
-                'color' => $this->color,
-            ],
+            'major' => new MajorResource($this->whenLoaded('major')),
         ];
-
-        return $arr;
     }
 }

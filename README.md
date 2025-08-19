@@ -1,66 +1,109 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API Inventori
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API Inventori adalah aplikasi berbasis Laravel yang dirancang untuk mengelola inventaris barang di sekolah. Aplikasi ini menyediakan endpoint API untuk mengelola data barang, pengguna, dan transaksi peminjaman.
 
-## About Laravel
+## Petunjuk Instalasi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Ikuti langkah-langkah berikut setelah melakukan clone repository:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Instalasi Dependensi
+Jalankan perintah berikut untuk menginstal semua package yang diperlukan:
+```bash
+composer install
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Update Dependensi (Opsional)
+Untuk memperbarui semua package ke versi terbaru:
+```bash
+composer update
+```
 
-## Learning Laravel
+### 3. Membuat File Environment
+Salin file environment example menjadi file environment aktif:
+```bash
+cp .env.example .env
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 4. Generate Kunci Aplikasi
+Buat kunci enkripsi unik untuk aplikasi Laravel:
+```bash
+php artisan key:generate
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 5. Konfigurasi Database
+Buka file `.env` dan konfigurasikan koneksi database Anda dengan mengisi nilai-nilai berikut:
+- `DB_CONNECTION` - Jenis database (mysql, postgresql, sqlite, dll)
+- `DB_HOST` - Alamat host database (biasanya localhost)
+- `DB_PORT` - Port database (3306 untuk MySQL, 5432 untuk PostgreSQL)
+- `DB_DATABASE` - Nama database yang akan digunakan
+- `DB_USERNAME` - Username untuk mengakses database
+- `DB_PASSWORD` - Password untuk mengakses database
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Contoh konfigurasi untuk MySQL:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=inventory_db
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
 
-## Laravel Sponsors
+### 6. Menjalankan Migrasi dan Seeder
+Buat tabel-tabel database dan isi dengan data contoh:
+```bash
+php artisan migrate --seed
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Perintah ini akan:
+- Membuat semua tabel yang diperlukan di database
+- Mengisi tabel dengan data sampel untuk pengujian
 
-### Premium Partners
+### 7. Instalasi Laravel Passport
+Instal dan konfigurasi Laravel Passport untuk autentikasi API:
+```bash
+php artisan passport:install --uuids
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+**Catatan Penting:**
+- Setelah menjalankan perintah di atas, tekan Enter dua kali untuk menghasilkan UUID clients
+- Anda akan melihat output yang menampilkan **Personal Access Client** credentials
+- Salin nilai `Client ID` dan `Client Secret` dari **Personal Access Client**
+- Tambahkan kredensial tersebut ke file `.env` Anda:
 
-## Contributing
+```env
+PASSPORT_PERSONAL_ACCESS_CLIENT_ID=your_client_id_here
+PASSPORT_PERSONAL_ACCESS_CLIENT_SECRET=your_client_secret_here
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 8. Menjalankan Aplikasi
+Untuk menjalankan server development:
+```bash
+php artisan serve
+```
 
-## Code of Conduct
+Aplikasi akan dapat diakses di `http://localhost:8000`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Catatan Penting
 
-## Security Vulnerabilities
+⚠️ **Setiap kali Anda mereset database (menjalankan `php artisan migrate:fresh` atau `php artisan db:wipe`), Anda HARUS menginstal ulang Laravel Passport (ulangi langkah 7).**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Endpoint API
 
-## License
+Setelah instalasi selesai, API akan tersedia dengan endpoint dasar:
+```
+http://localhost:8000/api/
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Dokumentasi API lengkap dapat diakses setelah aplikasi berjalan.
+
+## Troubleshooting
+
+### Masalah Umum:
+1. **Error "Key length is invalid"**: Jalankan `php artisan key:generate`
+2. **Error database connection**: Periksa konfigurasi database di file `.env`
+3. **Error Passport**: Pastikan telah menjalankan `php artisan passport:install --uuids`
+
+## Lisensi
+
+PPLG XII-V [lisensi MIT](https://opensource.org/licenses/MIT).

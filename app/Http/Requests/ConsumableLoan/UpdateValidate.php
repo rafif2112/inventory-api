@@ -24,13 +24,13 @@ class UpdateValidate extends FormRequest
         // $UnitLoanId = $this->route('consumable-loan')->id;
 
         return [
-            'student_id' => 'required',
-            'teacher_id' => 'required',
-            'consumable_item_id' => 'required',
-            'quantity' => 'required',
-            'purpose' => 'required',
-            'borrowed_by' => 'required',
-            'borrowed_at' => 'required',
+            'student_id' => 'sometimes|uuid|exists:students,id',
+            'teacher_id' => 'sometimes|uuid|exists:teachers,id',
+            'consumable_item_id' => 'sometimes|uuid|exists:consumable_items,id',
+            'quantity' => 'sometimes|integer|min:1',
+            'purpose' => 'sometimes|string|max:255',
+            'borrowed_by' => 'sometimes|string|max:255',
+            'borrowed_at' => 'sometimes|date',
         ];
     }
 }

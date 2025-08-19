@@ -10,9 +10,48 @@ class ConsumableItemService
     /**
      * Get all consumable items
      */
-    public function getAllConsumableItems()
+    public function getAllConsumableItems($user, $search = '', $sortType = '', $sortQuantity = '', $sortMajor = '')
     {
-        return ConsumableItem::all();
+        $query = ConsumableItem::query()
+            ->select('consumable_items.*')
+            ->with(['major'])
+            ->join('majors', 'consumable_items.major_id', '=', 'majors.id')
+            ->when($search, function ($q) use ($search) {
+                $q->where('consumable_items.name', 'ilike', "%{$search}%");
+            })
+            ->when(in_array($sortType, ['asc', 'desc']), function ($q) use ($sortType) {
+                $q->orderBy('consumable_items.name', $sortType);
+            })
+            ->when(in_array($sortQuantity, ['asc', 'desc']), function ($q) use ($sortQuantity) {
+                $q->orderBy('consumable_items.quantity', $sortQuantity);
+            })
+            ->when($user->role === 'superadmin' && in_array($sortMajor, ['asc', 'desc']), function ($q) use ($sortMajor) {
+                $q->orderBy('majors.name', $sortMajor);
+            });
+
+        return $query->get();
+    }
+
+    public function getDataConsumableItems($user, $search = '', $sortType = '', $sortQuantity = '', $sortMajor = '', $perPage = 10)
+    {
+        $query = ConsumableItem::query()
+            ->select('consumable_items.*')
+            ->with(['major'])
+            ->join('majors', 'consumable_items.major_id', '=', 'majors.id')
+            ->when($search, function ($q) use ($search) {
+                $q->where('consumable_items.name', 'ilike', "%{$search}%");
+            })
+            ->when(in_array($sortType, ['asc', 'desc']), function ($q) use ($sortType) {
+                $q->orderBy('consumable_items.name', $sortType);
+            })
+            ->when(in_array($sortQuantity, ['asc', 'desc']), function ($q) use ($sortQuantity) {
+                $q->orderBy('consumable_items.quantity', $sortQuantity);
+            })
+            ->when($user->role === 'superadmin' && in_array($sortMajor, ['asc', 'desc']), function ($q) use ($sortMajor) {
+                $q->orderBy('majors.name', $sortMajor);
+            });
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -21,12 +60,14 @@ class ConsumableItemService
     public function createConsumableItem(array $data)
     {
         try {
-            $newItem = ConsumableItem::create([
-                'name' => $data['name'],
-                'unit' => $data['unit'],
-                'quantity' => $data['quantity'],
-                'major_id' => $data['major_id'],
-            ]);
+            $newItem = ConsumableItem::updateOrCreate(
+                ['name' => $data['name']],
+                [
+                    'unit' => $data['unit'],
+                    'quantity' => $data['quantity'],
+                    'major_id' => $data['major_id'],
+                ]
+            );
 
             return $newItem;
         } catch (\Throwable $th) {
@@ -50,10 +91,10 @@ class ConsumableItemService
     {
         try {
             $consumableItem->update([
-                'name' => $data['name'],
-                'unit' => $data['unit'],
-                'major_id' => $data['major_id'],
-                'quantity' => $data['quantity'],
+                'name' => $data['name'] ?? $consumableItem->name,
+                'unit' => $data['unit'] ?? $consumableItem->unit,
+                'major_id' => $data['major_id'] ?? $consumableItem->major_id,
+                'quantity' => $data['quantity'] ?? $consumableItem->quantity,
             ]);
 
             return $consumableItem;

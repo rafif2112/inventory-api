@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('procurement_date');
             $table->boolean('status')->default(true); // true for available, false for not available
             $table->boolean('condition')->default(true); // true for good condition, false for damaged
-            $table->string('barcode')->nullable();
+            $table->string('qrcode')->nullable();
             $table->timestamps();
         });
     }

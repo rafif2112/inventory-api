@@ -22,13 +22,13 @@ class StoreValidate extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => 'nullable',
-            'teacher_id' => 'nullable',
-            'consumable_item_id' => 'nullable',
-            'quantity' => 'nullable',
-            'purpose' => 'nullable',
-            'borrowed_by' => 'nullable',
-            'borrowed_at' => 'nullable',
+            'student_id' => 'required_without:teacher_id|uuid|exists:students,id',
+            'teacher_id' => 'required_without:student_id|uuid|exists:teachers,id',
+            'consumable_item_id' => 'required|uuid|exists:consumable_items,id',
+            'quantity' => 'required|integer|min:1',
+            'purpose' => 'required|string|max:255',
+            'borrowed_by' => 'required|string|max:255',
+            'borrowed_at' => 'required|date',
         ];
     }
 }

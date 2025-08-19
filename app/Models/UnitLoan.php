@@ -21,7 +21,7 @@ class UnitLoan extends Model
         'room',
         'purpose',
         'status',
-        'signature',
+        'image',
         'guarantee',
     ];
 

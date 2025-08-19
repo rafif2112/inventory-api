@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UnitItem\StoreValidate;
 use App\Http\Requests\UnitItem\UpdateValidate;
+use App\Http\Resources\PaginationResource;
+use App\Http\Resources\UnitItemResource;
 use App\Models\UnitItem;
 use App\Services\UnitItemService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UnitItemController extends Controller
@@ -22,13 +25,21 @@ class UnitItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        $unitItems = $this->unitItemService->getAllUnitItems();
+        $user = Auth::user();
+        $search = $request->query('search');
+        $sortDate = $request->query('sort_date');
+        $sortType = $request->query('sort_type');
+        $sortCondition = $request->query('sort_condition');
+        $sortMajor = $request->query('sort_major');
+
+        $unitItems = $this->unitItemService->getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor);
+
         return response()->json([
             'status' => 200,
-            'data' => $unitItems,
+            'data' => UnitItemResource::collection($unitItems->items()),
+            'meta' => new PaginationResource($unitItems)
         ], 200);
     }
 
@@ -37,7 +48,6 @@ class UnitItemController extends Controller
      */
     public function store(StoreValidate $request)
     {
-        //
         $data = $request->validated();
 
         DB::beginTransaction();
@@ -46,7 +56,7 @@ class UnitItemController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 201,
-                'data' => $newUnitItem,
+                'message' => 'Unit item created successfully',
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -61,10 +71,10 @@ class UnitItemController extends Controller
      */
     public function show(UnitItem $unitItem)
     {
-        //
+        $unitItem->load('subItem', 'subItem.item', 'subItem.major');
         return response()->json([
             'status' => 200,
-            'data' => $unitItem,
+            'data' => new UnitItemResource($unitItem),
         ], 200);
     }
 
@@ -73,16 +83,14 @@ class UnitItemController extends Controller
      */
     public function update(UpdateValidate $request, UnitItem $unitItem)
     {
-        //
         $data = $request->validated();
-
         DB::beginTransaction();
         try {
             $updatedUnitItem = $this->unitItemService->updateUnitItem($unitItem, $data);
             DB::commit();
             return response()->json([
                 'status' => 200,
-                'data' => $updatedUnitItem,
+                'message' => 'Unit item updated successfully',
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -98,10 +106,16 @@ class UnitItemController extends Controller
      */
     public function destroy(UnitItem $unitItem)
     {
-        //
         DB::beginTransaction();
         try {
+            $subItem = $unitItem->subItem;
+
+            if ($subItem) {
+                $subItem->decrement('stock');
+            }
+
             $unitItem->whereId($unitItem->id)->delete();
+
             DB::commit();
             return response()->json([
                 'status' => 200,

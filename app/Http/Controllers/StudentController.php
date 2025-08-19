@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Student\StoreValidate;
 use App\Http\Requests\Student\UpdateValidate;
+use App\Http\Resources\PaginationResource;
 use App\Http\Resources\StudentResource;
 use App\Imports\StudentImport;
 use App\Models\Student;
@@ -34,6 +35,20 @@ class StudentController extends Controller
         ], 200);
     }
 
+    public function getStudentData(Request $request)
+    {
+        $search = $request->query('search', '');
+        $sortMajor = $request->query('sort_major');
+        $page = $request->query('page', 1);
+        $data = $this->studentService->getStudentData($search, $sortMajor, $page);
+
+        return response()->json([
+            'status' => 200,
+            'data' => StudentResource::collection($data['data']),
+            'meta' => new PaginationResource($data['meta']),
+        ], 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -48,7 +63,7 @@ class StudentController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 201,
-                'data' => $newData,
+                'message' => 'Student created successfully',
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -86,7 +101,7 @@ class StudentController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 200,
-                'data' => $updatedStudent,
+                'message' => 'Student updated successfully',
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -102,6 +117,7 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
+        DB::beginTransaction();
         try {
             if (!$student) {
                 return response()->json([
@@ -112,15 +128,37 @@ class StudentController extends Controller
 
             $this->studentService->deleteStudent($student);
 
+            DB::commit();
             return response()->json([
-                'status' => 204,
+                'status' => 200,
                 'message' => 'data deleted successfully'
-            ], 204);
+            ], 200);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'status' => 'error',
                 'message' => 'failed to delete data'
             ]);
+        }
+    }
+
+    public function resetData()
+    {
+        DB::beginTransaction();
+        try {
+            $this->studentService->resetData();
+
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Student data has been reset successfully.'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to reset student data: ' . $th->getMessage()
+            ], 500);
         }
     }
 

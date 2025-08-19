@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ConsumableItem\StoreValidate;
 use App\Http\Requests\ConsumableItem\UpdateValidate;
+use App\Http\Resources\ConsumableItemResource;
+use App\Http\Resources\PaginationResource;
 use App\Models\ConsumableItem;
 use App\Services\ConsumableItemService;
 use Illuminate\Http\Request;
@@ -21,13 +23,46 @@ class ConsumableItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->consumableItemService->getAllConsumableItems();
+        $search = $request->query('search', '');
+        $sortType = $request->query('sort_type', '');
+        $sortQuantity = $request->query('sort_quantity', '');
+        $sortMajor = $request->query('sort_major', '');
+
+        $data = $this->consumableItemService->getAllConsumableItems(
+            auth()->user(),
+            $search,
+            $sortType,
+            $sortQuantity,
+            $sortMajor
+        );
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => ConsumableItemResource::collection($data),
+        ], 200);
+    }
+
+    public function getData(Request $request)
+    {
+        $search = $request->query('search', '');
+        $sortType = $request->query('sort_type', '');
+        $sortQuantity = $request->query('sort_quantity', '');
+        $sortMajor = $request->query('sort_major', '');
+
+        $data = $this->consumableItemService->getDataConsumableItems(
+            auth()->user(),
+            $search,
+            $sortType,
+            $sortQuantity,
+            $sortMajor,
+        );
+
+        return response()->json([
+            'status' => 200,
+            'data' => ConsumableItemResource::collection($data),
+            'meta' => new PaginationResource($data)
         ], 200);
     }
 

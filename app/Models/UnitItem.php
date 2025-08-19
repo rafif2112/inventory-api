@@ -17,11 +17,16 @@ class UnitItem extends Model
         'procurement_date',
         'status',
         'condition',
-        'barcode',
+        'qrcode',
     ];
 
     public function subItem()
     {
         return $this->belongsTo(SubItem::class, 'sub_item_id');
     }
+
+    public function unitLoans()
+    {
+        return $this->hasMany(UnitLoan::class, 'unit_item_id');
+    }    
 }

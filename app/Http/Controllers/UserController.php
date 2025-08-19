@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\StoreValidate;
 use App\Http\Requests\User\UpdateValidate;
+use App\Http\Resources\PaginationResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -27,8 +29,24 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => UserResource::collection($data),
         ], 200);
+    }
+
+    public function indexPaginate(Request $request)
+    {
+
+        $search = $request->query('search', '');
+        $sortDir = $request->query('sort_dir', 'asc');
+
+        $users = $this->userService->getUsersWithMajorPaginate($search, $sortDir);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Users retrieved successfully',
+            'data' => UserResource::collection($users->items()),
+            'meta' => new PaginationResource($users)
+        ]);
     }
 
     /**
@@ -45,7 +63,8 @@ class UserController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 201,
-                'data' => $newData,
+                // 'data' => $newData,
+                'message' => "User created successfully"
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -110,9 +129,9 @@ class UserController extends Controller
             $this->userService->deleteUser($user);
 
             return response()->json([
-                'status' => 204,
+                'status' => 200,
                 'message' => 'data deleted successfully'
-            ], 204);
+            ], 200);
         } catch (\Throwable) {
             return response()->json([
                 'status' => 'error',
