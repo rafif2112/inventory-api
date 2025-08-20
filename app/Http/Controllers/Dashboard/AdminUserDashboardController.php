@@ -92,8 +92,8 @@ class AdminUserDashboardController extends Controller
         $total = $totalUnitItems + $totalConsumables;
 
 
-        // Tampilkan data ke view
-        return view('admin.dashboard', [
+        // Tampilkan data ke response
+        return response('admin.dashboard', [
             'totalUnitItems' => $totalUnitItems,
             'total' => $total,
             'totalConsumables' => $totalConsumables,
