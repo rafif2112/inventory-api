@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\UnitLoan;
 use Carbon\Carbon;
-use App\Http\Resources\Superadmin\ItemsLoansHistoryResource;
+use App\Http\Resources\Admin\ItemsLoansHistoryResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -23,37 +23,6 @@ class AdminUserDashboardController extends Controller
     /**
      * Display a listing of the resource.
      */
-
-    public function getItemsLoansHistory()
-    {
-        $items = UnitItem::with(['subItem' => function ($q) {
-            $q->latest()->limit(1);
-        }])
-            ->latest()
-            ->take(5)
-            ->get();
-
-        return response()->json([
-            'status' => 200,
-            'data' => ItemsLoansHistoryResource::collection($items)
-        ]);
-    }
-
-    public function itemCount()
-    {
-        $data = SubItem::where('major_id', Auth::user()->major_id)
-            ->with(['item'])
-            ->get()
-            ->map(function ($subItem) {
-                $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
-                return $subItem;
-            });
-
-        return response()->json([
-            'status' => 200,
-            'data' => ItemcountResource::collection($data)
-        ], 200);
-    }
 
     public function itemBorrowPercentage(Request $request)
     {
@@ -93,44 +62,14 @@ class AdminUserDashboardController extends Controller
 
 
         // Tampilkan data ke response
-        return response('admin.dashboard', [
-            'totalUnitItems' => $totalUnitItems,
-            'total' => $total,
-            'totalConsumables' => $totalConsumables,
-        ]);
-    }
-
-    public function unitItem()
-    {
-        $totalUnitItems = UnitItem::count();
-        $latestUnitItems = UnitItem::latest()->take(5)->get();
-
         return response()->json([
-            'totalUnitItems' => $totalUnitItems,
-            'latestUnitItems' => $latestUnitItems,
-        ]);
-    }
-
-    public function consumableItem()
-    {
-        $totalConsumables = ConsumableItem::count();
-        $latestConsumables = ConsumableItem::latest()->take(5)->get();
-
-        return response()->json([
-            'totalConsumables' => $totalConsumables,
-            'latestConsumables' => $latestConsumables,
-        ]);
-    }
-
-    public function item()
-    {
-        $totalItems = Item::count();
-        $latestItems = Item::latest()->take(5)->get();
-
-        return response()->json([
-            'totalItems' => $totalItems,
-            'latestItems' => $latestItems,
-        ]);
+            'status' => 200,
+            'data' => [
+                'totalUnitItems' => $totalUnitItems,
+                'total' => $total,
+                'totalConsumables' => $totalConsumables,
+            ]
+        ], 200);
     }
 
     public function getLoanReport(Request $request)
@@ -141,7 +80,7 @@ class AdminUserDashboardController extends Controller
 
         if (!$fromYear || !$toYear) {
             return response()->json([
-                'status' => 'error',
+                'status' => 400,
                 'message' => 'Parameter from dan to wajib diisi'
             ], 400);
         }
@@ -193,7 +132,7 @@ class AdminUserDashboardController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => $e->getMessage()
             ], 500);
         }
