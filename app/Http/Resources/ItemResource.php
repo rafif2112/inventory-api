@@ -19,6 +19,7 @@ class ItemResource extends JsonResource
         $arr = [
             'id' => $this->id,
             'name' => $this->name,
+            'code_item' => $this->code_item,
         ];
 
         return $arr;

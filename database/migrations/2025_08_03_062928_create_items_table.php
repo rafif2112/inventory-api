@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->integer('code_item')->unique();
             $table->string('name');
             $table->timestamps();
         });
