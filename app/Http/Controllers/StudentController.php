@@ -68,7 +68,7 @@ class StudentController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to create new data'
             ]);
         }
@@ -106,7 +106,7 @@ class StudentController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to update data'
             ]);
         }
@@ -119,12 +119,6 @@ class StudentController extends Controller
     {
         DB::beginTransaction();
         try {
-            if (!$student) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'data not found'
-                ], 404);
-            }
 
             $this->studentService->deleteStudent($student);
 
@@ -136,7 +130,7 @@ class StudentController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to delete data'
             ]);
         }
@@ -156,7 +150,7 @@ class StudentController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to reset student data: ' . $th->getMessage()
             ], 500);
         }
@@ -175,7 +169,7 @@ class StudentController extends Controller
 
         if (!$file) {
             return response()->json([
-                'status' => 'error',
+                'status' => 400,
                 'message' => 'No file uploaded'
             ], 400);
         }
@@ -192,7 +186,7 @@ class StudentController extends Controller
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status' => 400,
                 'message' => 'Failed to import data: ' . $e->getMessage()
             ], 500);
         }

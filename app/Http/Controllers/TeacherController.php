@@ -158,7 +158,7 @@ class TeacherController extends Controller
 
         if (!$file) {
             return response()->json([
-                'status' => 'error',
+                'status' => 400,
                 'message' => 'No file uploaded'
             ], 400);
         }
@@ -168,12 +168,12 @@ class TeacherController extends Controller
             Excel::import($import, $file);
 
             return response()->json([
-                'status' => 'success',
+                'status' => 200,
                 'message' => 'Data imported successfully'
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to import data: ' . $e->getMessage()
             ], 500);
         }

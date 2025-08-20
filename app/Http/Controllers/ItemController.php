@@ -74,7 +74,7 @@ class ItemController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to create item',
             ], 500);
         }
@@ -114,7 +114,7 @@ class ItemController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to update item',
             ], 500);
         }
