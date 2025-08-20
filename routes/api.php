@@ -10,9 +10,9 @@ use App\Http\Controllers\ConsumableItemController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UnitItemController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\Superadmin\DashboardController;
 use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/user', [AuthController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
 
@@ -46,11 +47,8 @@ Route::middleware('auth:api')->group(function () {
 
     
     Route::post('/student/import', [StudentController::class, 'import']);
-    Route::get('/student/data', [StudentController::class, 'getStudentData']);
-    Route::delete('/student/reset', [StudentController::class, 'resetData']);
-    Route::apiResource('/student', StudentController::class);
 
-    Route::get('/user/paginate', [UserController::class, 'indexPaginate']);
+    Route::apiResource('/student', StudentController::class);
     Route::apiResource('/user', UserController::class);
 
     Route::get('/item/paginate', [ItemController::class, 'itemPaginate']);
@@ -62,9 +60,11 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/major', MajorController::class);
 
     Route::get('/consumable-loan/history', [ConsumableLoanController::class, 'getConsumableLoanHistory']);
+    
+    Route::apiResource('/item', ItemController::class);
+    Route::apiResource('/subitem', SubItemController::class);
+    Route::apiResource('/major', MajorController::class);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
-
-    Route::get('/consumable-item/data', [ConsumableItemController::class, 'getData']);
     Route::apiResource('/consumable-item', ConsumableItemController::class);
 
     Route::post('/teacher/import', [TeacherController::class, 'import']);
@@ -96,4 +96,11 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/major-loans', [DashboardController::class, 'getMajorLoans']);
     Route::get('/items-loans-history', [DashboardController::class, 'getItemsLoansHistory']);
+    
+    Route::apiResource('/unit-loan', UnitLoanController::class);
+
+    Route::apiResource('/teacher', TeacherController::class)->only('index', 'show');
+    Route::apiResource('/unit-items', UnitItemController::class);
+
+    Route::post('/teachers-import', [TeacherController::class, 'import']);
 });

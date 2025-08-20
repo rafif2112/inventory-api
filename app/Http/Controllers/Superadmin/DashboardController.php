@@ -14,11 +14,14 @@ use App\Models\Item;
 use App\Models\UnitItem;
 use Illuminate\Http\Request;
 use App\Services\Superadmin\DashboardService;
+use App\Models\Teacher;
+use App\Models\Student;
+use App\Models\ConsumableItem;
 
 class DashboardController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * API Dashboard utama
      */
     protected $dashboardService;
 
@@ -26,15 +29,6 @@ class DashboardController extends Controller
     {
         $this->dashboardService = $dashboardService;
     }
-
-
-    public function index()
-    {
-        $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
-
-        return CountTotalLoansResource::collection($majors);
-    }
-
 
     // public function getItemsLoansHistory()
     // {
@@ -50,27 +44,63 @@ class DashboardController extends Controller
         return CountTotalLoansResource::collection($majors);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function index()
     {
-        //
-    }
-    public function update(Request $request, string $id)
-    {
-        //
+        $totalTeachers    = Teacher::count();
+        $totalStudents    = Student::count();
+        $totalUnitItems   = UnitItem::count();
+        $totalConsumables = ConsumableItem::count();
+        $latestUnitItems  = UnitItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalTeachers'    => $totalTeachers,
+            'totalStudents'    => $totalStudents,
+            'totalUnitItems'   => $totalUnitItems,
+            'totalConsumables' => $totalConsumables,
+            'latestUnitItems'  => $latestUnitItems
+        ]);
     }
 
-    public function destroy(string $id)
+    public function student()
     {
-        //
+        $totalStudents = Student::count();
+
+        return response()->json([
+            'totalStudents' => $totalStudents,
+        ]);
+    }
+
+    public function teacher()
+    {
+        $totalTeachers = Teacher::count();
+
+        return response()->json([
+            'totalTeachers' => $totalTeachers,
+        ]);
+    }
+
+    public function unitItem()
+    {
+        $totalUnitItems  = UnitItem::count();
+        $latestUnitItems = UnitItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalUnitItems'  => $totalUnitItems,
+            'latestUnitItems' => $latestUnitItems,
+        ]);
+    }
+
+    public function consumable()
+    {
+        $totalConsumables = ConsumableItem::count();
+
+        return response()->json([
+            'totalConsumables' => $totalConsumables,
+        ]);
     }
 
 
     // Most of Borrowing
-
-
     public function indexBorrowing()
     {
         $data = $this->dashboardService->getItemsSummary();

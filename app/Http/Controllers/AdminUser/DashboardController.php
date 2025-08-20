@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\UnitLoan;
 use Carbon\Carbon;
 use App\Http\Resources\Superadmin\ItemsLoansHistoryResource;
-use App\Models\UnitItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +13,10 @@ use App\Http\Resources\Admin\ItemCountResource;
 use App\Http\Resources\Admin\ItemBorrowPercentage;
 use App\Models\SubItem;
 use App\Models\UnitItem;
+use App\Models\Teacher;
+use App\Models\Student;
+use App\Models\ConsumableItem;
+use App\Models\Item;
 
 class DashboardController extends Controller
 {
@@ -21,14 +24,14 @@ class DashboardController extends Controller
      * Display a listing of the resource.
      */
 
-     public function getItemsLoansHistory()
+    public function getItemsLoansHistory()
     {
-        $items = UnitItem::with(['subItem' => function($q) {
-                        $q->latest()->limit(1); 
-                    }])
-                    ->latest()
-                    ->take(5)
-                    ->get();
+        $items = UnitItem::with(['subItem' => function ($q) {
+            $q->latest()->limit(1);
+        }])
+            ->latest()
+            ->take(5)
+            ->get();
 
         return response()->json([
             'status' => 200,
@@ -36,20 +39,15 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function index()
-    {
-        
-    }
-
     public function itemCount()
     {
         $data = SubItem::where('major_id', Auth::user()->major_id)
-        ->with(['item'])
-        ->get()
-        ->map(function ($subItem) {
-            $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
-            return $subItem;
-        });
+            ->with(['item'])
+            ->get()
+            ->map(function ($subItem) {
+                $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
+                return $subItem;
+            });
 
         return response()->json([
             'status' => 200,
@@ -63,20 +61,20 @@ class DashboardController extends Controller
         $endDate = $request->query('end_date');
 
         $data = DB::table('sub_items')
-        ->join('items', 'sub_items.item_id', '=', 'items.id')
-        ->select('items.name', DB::raw('SUM(sub_items.stock) as total_stock'))
-        ->where('sub_items.major_id', Auth::user()->major_id)
-        ->when($startDate && $endDate && $startDate === $endDate, function ($query) use ($startDate) {
-            return $query->whereDate('borrowed_at', $startDate);
-        })
-        ->when($startDate && (!$endDate || $startDate !== $endDate), function ($query) use ($startDate) {
-            return $query->where('borrowed_at', '>=', $startDate);
-        })
-        ->when($endDate && (!$startDate || $startDate !== $endDate), function ($query) use ($endDate) {
-            return $query->where('borrowed_at', '<=', $endDate);
-        })
-        ->groupBy('items.name')
-        ->get();
+            ->join('items', 'sub_items.item_id', '=', 'items.id')
+            ->select('items.name', DB::raw('SUM(sub_items.stock) as total_stock'))
+            ->where('sub_items.major_id', Auth::user()->major_id)
+            ->when($startDate && $endDate && $startDate === $endDate, function ($query) use ($startDate) {
+                return $query->whereDate('borrowed_at', $startDate);
+            })
+            ->when($startDate && (!$endDate || $startDate !== $endDate), function ($query) use ($startDate) {
+                return $query->where('borrowed_at', '>=', $startDate);
+            })
+            ->when($endDate && (!$startDate || $startDate !== $endDate), function ($query) use ($endDate) {
+                return $query->where('borrowed_at', '<=', $endDate);
+            })
+            ->groupBy('items.name')
+            ->get();
 
         return response()->json([
             'status' => 200,
@@ -86,33 +84,53 @@ class DashboardController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function index(Request $request)
     {
-        //
+        // Hitung total semua data
+        $totalUnitItems = UnitItem::count();
+        $totalConsumables = ConsumableItem::count();
+        $total = $totalUnitItems + $totalConsumables;
+
+
+        // Tampilkan data ke view
+        return view('admin.dashboard', [
+            'totalUnitItems' => $totalUnitItems,
+            'total' => $total,
+            'totalConsumables' => $totalConsumables,
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function unitItem()
     {
-        //
+        $totalUnitItems = UnitItem::count();
+        $latestUnitItems = UnitItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalUnitItems' => $totalUnitItems,
+            'latestUnitItems' => $latestUnitItems,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function consumableItem()
     {
-        //
+        $totalConsumables = ConsumableItem::count();
+        $latestConsumables = ConsumableItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalConsumables' => $totalConsumables,
+            'latestConsumables' => $latestConsumables,
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function item()
     {
-        //
+        $totalItems = Item::count();
+        $latestItems = Item::latest()->take(5)->get();
+
+        return response()->json([
+            'totalItems' => $totalItems,
+            'latestItems' => $latestItems,
+        ]);
     }
 
     public function getLoanReport(Request $request)
@@ -186,7 +204,6 @@ class DashboardController extends Controller
             ], 500);
         }
     }
-
 
 
     public function latestActivity(Request $request)
