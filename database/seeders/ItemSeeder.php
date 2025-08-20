@@ -14,19 +14,13 @@ class ItemSeeder extends Seeder
     public function run(): void
     {
         $items = [
-            ['name' => 'Laptop'],
-            ['name' => 'Komputer'],
-            ['name' => 'Monitor'],
-            ['name' => 'Keyboard'],
-            ['name' => 'Mouse'],
-            ['name' => 'Printer'],
-            ['name' => 'Speaker'],
-            ['name' => 'Proyektor'],
-            ['name' => 'Kabel HDMI'],
-            ['name' => 'Router'],
-            ['name' => 'Switch'],
-            ['name' => 'Tablet'],
-            ['name' => 'Smartphone'],
+            ['name' => 'Laptop', 'code_item' => 1],
+            ['name' => 'Komputer', 'code_item' => 2],
+            ['name' => 'Monitor', 'code_item' => 3],
+            ['name' => 'Keyboard', 'code_item' => 4],
+            ['name' => 'Mouse', 'code_item' => 5],
+            ['name' => 'Printer', 'code_item' => 6],
+            ['name' => 'Speaker', 'code_item' => 7],
         ];
 
         foreach ($items as $item) {

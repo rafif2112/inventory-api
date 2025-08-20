@@ -29,7 +29,7 @@ class ConsumableLoanController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $data,
+            'data' => ConsumableLoanResource::collection($data),
         ], 200);
     }
 
@@ -64,7 +64,7 @@ class ConsumableLoanController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $consumableLoanData,
+            'data' => ConsumableLoanResource::make($consumableLoanData),
         ], 200);
     }
 
