@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\AdminUser;
+namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\UnitLoan;
@@ -18,7 +18,7 @@ use App\Models\Student;
 use App\Models\ConsumableItem;
 use App\Models\Item;
 
-class DashboardController extends Controller
+class AdminUserDashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -180,17 +180,11 @@ class DashboardController extends Controller
                 'Dec' => 0,
             ];
 
-            $result = [];
+            $result = $months;
 
             foreach ($loans as $loan) {
-                $year  = Carbon::parse($loan->borrowed_at)->format('Y'); // result : 2025
-                $month = Carbon::parse($loan->borrowed_at)->format('M'); //result : Jan
-
-                if (!isset($result[$year])) {
-                    $result[$year] = $months;
-                }
-
-                $result[$year][$month] += 1;
+                $monthEng = Carbon::parse($loan->borrowed_at)->format('M'); // contoh: Jan, Feb, ...
+                $result[$monthEng] += 1;
             }
 
             return response()->json([

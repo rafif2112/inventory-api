@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Superadmin;
+namespace App\Http\Controllers\Dashboard;
 
 use App\Models\UnitLoan;
 use App\Models\Major;
@@ -18,7 +18,7 @@ use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\ConsumableItem;
 
-class DashboardController extends Controller
+class SuperadminDashboardController extends Controller
 {
     /**
      * API Dashboard utama
