@@ -170,7 +170,6 @@ class AdminUserDashboardController extends Controller
         }
     }
 
-
     public function latestActivity(Request $request)
     {
         $user = auth()->user();

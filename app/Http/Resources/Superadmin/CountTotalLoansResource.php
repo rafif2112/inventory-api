@@ -18,13 +18,30 @@ class CountTotalLoansResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $arr = [
+        $fromDate = $request->query('from', now()->startOfYear()->toDateString());
+        $toDate   = $request->query('to', now()->endOfYear()->toDateString());
+
+        if ($fromDate > $toDate) {
+            [$fromDate, $toDate] = [$toDate, $fromDate];
+        }
+
+        $consumableCount = $this->consumableLoans
+            ->whereBetween('borrowed_at', [$fromDate, $toDate])
+            ->count();
+
+        $unitCount = $this->subItems
+            ->sum(
+                fn($sub) => $sub->unitLoans
+                    ->whereBetween('borrowed_at', [$fromDate, $toDate])
+                    ->count()
+            );
+
+        $grandTotal = $consumableCount + $unitCount;
+
+        return [
             'id' => $this->id,
             'major' => $this->name,
-            'count' => $this->consumableLoans->count()
-                + $this->subItems->sum(fn($sub) => $sub->unitLoans->count()),
+            'count' => $grandTotal,
         ];
-
-        return $arr;
     }
 }
