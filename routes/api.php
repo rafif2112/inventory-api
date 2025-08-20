@@ -96,6 +96,7 @@ Route::middleware('auth:api')->group(function () {
         Route::prefix('/admin-user')->controller(AdminUserDashboardController::class)->group(function () {
             Route::get('/latest-activity', 'latestActivity');
             Route::get('/item-count', 'itemCount');
+            Route::get('/item-count-percentage', 'indexAverageBorrowing');
         });
 
         Route::prefix('/superadmin')->controller(SuperadminDashboardController::class)->group(function () {
