@@ -9,6 +9,9 @@ use App\Models\ConsumableLoan;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Superadmin\CountTotalLoansResource;
+use App\Http\Resources\Superadmin\ItemsLoansHistoryResource;
+use App\Models\Item;
+use App\Models\UnitItem;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -22,6 +25,14 @@ class DashboardController extends Controller
 
         return CountTotalLoansResource::collection($majors);
     }
+
+
+    // public function getItemsLoansHistory()
+    // {
+    //     $items = UnitItem::with(['subItems', 'unitItems'])->get();
+
+    //     return ItemsLoansHistoryResource::collection($items);
+    // }
 
     /**
      * Store a newly created resource in storage.

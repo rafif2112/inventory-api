@@ -84,4 +84,5 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::get('/major-loans', [DashboardController::class, 'getMajorLoans']);
+    Route::get('/items-loans-history', [DashboardController::class, 'getItemsLoansHistory']);
 });
