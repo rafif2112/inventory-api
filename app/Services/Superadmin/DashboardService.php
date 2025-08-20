@@ -41,11 +41,7 @@ class DashboardService
             return $item;
         });
 
-        return [
-            'status' => 200,
-            'total_borrowed' => $totalAll,
-            'data' => $result
-        ];
+        return $result;
     }
 
 
