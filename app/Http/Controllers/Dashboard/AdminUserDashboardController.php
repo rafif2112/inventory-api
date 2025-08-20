@@ -135,8 +135,8 @@ class AdminUserDashboardController extends Controller
 
     public function getLoanReport(Request $request)
     {
-        $fromYear = $request->query('from', '');
-        $toYear   = $request->query('to', '');
+        $fromYear = $request->query('from', Carbon::now()->year);
+        $toYear   = $request->query('to', Carbon::now()->year);
         $itemId   = $request->query('item_id', '');
 
         if (!$fromYear || !$toYear) {
@@ -188,7 +188,7 @@ class AdminUserDashboardController extends Controller
             }
 
             return response()->json([
-                'status' => 'success',
+                'status' => 200,
                 'data' => $result
             ]);
         } catch (\Exception $e) {
