@@ -66,8 +66,8 @@ class AdminUserDashboardController extends Controller
             'status' => 200,
             'data' => [
                 'totalUnitItems' => $totalUnitItems,
-                'total' => $total,
                 'totalConsumables' => $totalConsumables,
+                'total' => $total,
             ]
         ], 200);
     }
