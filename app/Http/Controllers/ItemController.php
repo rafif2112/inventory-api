@@ -58,8 +58,12 @@ class ItemController extends Controller
         DB::beginTransaction();
         try {
 
+            $lastItem = Item::orderBy('id', 'desc')->first();
+            $codeItem = $lastItem ? $lastItem->code_item + 1 : 1;
+
             $item = Item::create([
                 'name' => $request->name,
+                'code_item' => $codeItem,
             ]);
 
             DB::commit();
