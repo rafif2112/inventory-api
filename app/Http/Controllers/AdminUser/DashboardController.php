@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\AdminUser;
 
 use App\Http\Controllers\Controller;
+use App\Models\UnitLoan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -45,5 +47,94 @@ class DashboardController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getLoanReport(Request $request)
+    {
+        $fromYear = $request->query('from', '');
+        $toYear   = $request->query('to', '');
+        $itemId   = $request->query('item_id', '');
+
+        if (!$fromYear || !$toYear) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter from dan to wajib diisi'
+            ], 400);
+        }
+
+        try {
+            $startDate = Carbon::create($fromYear, 1, 1)->startOfDay();
+            $endDate   = Carbon::create($toYear, 12, 31)->endOfDay();
+
+            $userMajorId = auth()->user()->major_id;
+
+            $loans = UnitLoan::where('status', 1)
+                ->whereBetween('borrowed_at', [$startDate, $endDate])
+                ->whereHas('unitItem.subItem', function ($q) use ($userMajorId) {
+                    $q->where('major_id', $userMajorId);
+                })
+                ->when($itemId, function ($q) use ($itemId) {
+                    $q->whereHas('unitItem.subItem.item', function ($subQ) use ($itemId) {
+                        $subQ->where('id', $itemId);
+                    });
+                })
+                ->get();
+
+            // Template bulan
+            $months = [
+                'Jan' => 0,
+                'Feb' => 0,
+                'Mar' => 0,
+                'Apr' => 0,
+                'May' => 0,
+                'Jun' => 0,
+                'Jul' => 0,
+                'Aug' => 0,
+                'Sep' => 0,
+                'Oct' => 0,
+                'Nov' => 0,
+                'Dec' => 0,
+            ];
+
+            $result = [];
+
+            foreach ($loans as $loan) {
+                $year  = Carbon::parse($loan->borrowed_at)->format('Y'); // result : 2025
+                $month = Carbon::parse($loan->borrowed_at)->format('M'); //result : Jan
+
+                if (!isset($result[$year])) {
+                    $result[$year] = $months;
+                }
+
+                $result[$year][$month] += 1;
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+    public function latestActivity(Request $request)
+    {
+        $user = auth()->user();
+        $majorId = $user->major_id;
+
+        $latestLoans = UnitLoan::with('unitItem.subItem')
+            ->latestByMajor($majorId, 3)
+            ->get();
+
+        return response()->json([
+            'status' => 200,
+            'data' => $latestLoans
+        ]);
     }
 }
