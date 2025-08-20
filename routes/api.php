@@ -13,6 +13,7 @@ use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\UnitLoanController;
+use App\Http\Controllers\Superadmin\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,12 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
+
+    // Dashboard
+    Route::get('/dashboard-most-borrowed', [DashboardController::class, 'indexBorrowing']);
+    Route::get('/dashboard-most-borrowed-persen', [DashboardController::class, 'indexAverageBorrowing']);
+
+    
     Route::post('/student/import', [StudentController::class, 'import']);
     Route::get('/student/data', [StudentController::class, 'getStudentData']);
     Route::delete('/student/reset', [StudentController::class, 'resetData']);
