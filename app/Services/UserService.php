@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
-    public function getAllUsers()
+    public function getLoginUser()
     {
-        return User::with('major')->get();
+        return auth()->user()->only(['id', 'name', 'username', 'role', 'major_id']);
     }
 
     public function getUsersWithMajorPaginate(string $search = '', string $sortDir = 'asc', int $perPage = 10)
