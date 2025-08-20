@@ -31,4 +31,14 @@ class SubItem extends Model
     {
         return $this->hasMany(UnitItem::class, 'sub_item_id');
     }
+
+    public function unitLoans()
+    {
+        return $this->hasManyThrough(
+            UnitLoan::class,
+            UnitItem::class,
+            'sub_item_id',  
+            'unit_item_id',           
+        );
+    }
 }

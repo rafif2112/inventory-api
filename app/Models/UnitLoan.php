@@ -48,4 +48,9 @@ class UnitLoan extends Model
             ->orderBy('borrowed_at', 'desc')
             ->take($limit);
     }
+    
+    public function major()
+    {
+        return $this->hasOneThrough(Major::class, UnitItem::class, 'unit_item_id', 'major_id');
+    }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\Superadmin\DashboardController;
 use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -85,4 +86,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/latest-activity', [DashboardController::class, 'latestActivity']);
     Route::get('/loan-report', [DashboardController::class, 'getLoanReport']);
 
+    Route::get('/major-loans', [DashboardController::class, 'getMajorLoans']);
+    Route::get('/items-loans-history', [DashboardController::class, 'getItemsLoansHistory']);
 });
