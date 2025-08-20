@@ -38,5 +38,19 @@ class UnitLoan extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');
-    }   
+    }
+
+    public function scopeLatestByMajor($query, $majorId, $limit = 3)
+    {
+        return $query->whereHas('unitItem.subItem', function ($q) use ($majorId) {
+            $q->where('major_id', $majorId);
+        })
+            ->orderBy('borrowed_at', 'desc')
+            ->take($limit);
+    }
+    
+    public function major()
+    {
+        return $this->hasOneThrough(Major::class, UnitItem::class, 'unit_item_id', 'major_id');
+    }
 }

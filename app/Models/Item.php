@@ -18,4 +18,9 @@ class Item extends Model
     {
         return $this->hasMany(SubItem::class, 'item_id');
     }
+
+    public function unitItems()
+    {
+        return $this->hasOne(UnitItem::class, 'item_id');
+    }
 }

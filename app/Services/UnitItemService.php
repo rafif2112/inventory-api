@@ -33,7 +33,8 @@ class UnitItemService
             })
             ->when($sortMajor, function ($q) use ($sortMajor) {
                 $q->orderBy('majors.name', $sortMajor);
-            });
+            })
+            ->latest();
 
         if ($search) {
             $query->where('unit_items.code_unit', 'ILIKE', '%' . $search . '%')
@@ -56,9 +57,11 @@ class UnitItemService
         $words = explode(' ', $subItem->merk);
         $merkCode = strtoupper(substr($words[0], 0, 4));
 
-        $sequence = str_pad($number, 3, '0', STR_PAD_LEFT);
+        $sequence = str_pad($number, 2, '0', STR_PAD_LEFT);
 
-        return "{$majorCode}-{$merkCode}-{$sequence}";
+        $codeItem = $subItem->item->code_item ?? '0';
+
+        return "{$majorCode}-{$merkCode}-{$codeItem}{$sequence}";
     }
 
     public function storeUnitItem(array $data)
@@ -83,18 +86,25 @@ class UnitItemService
                 $subItem = $newSubItem;
             }
 
-            $similarSubItems = SubItem::where('item_id', $data['item_id'])
-                ->whereRaw("LOWER(REPLACE(merk, ' ', '')) LIKE ?", [
-                    strtolower(str_replace(' ', '', $data['merk'])) . '%'
-                ])
+            $merkWords = explode(' ', $data['merk']);
+            $firstMerkWord = $merkWords[0];
+
+            $similarSubItems = SubItem::where(function ($query) use ($firstMerkWord) {
+                    $query->where('merk', 'ILIKE', $firstMerkWord . '%');
+                })
+                ->where('item_id', $data['item_id'])
                 ->pluck('id');
 
-            $lastUnitItem = UnitItem::whereIn('sub_item_id', $similarSubItems)
-                ->orderBy('id', 'desc')
-                ->first();
+            if ($similarSubItems->isEmpty()) {
+                $sequenceNumber = 1;
+            } else {
+                $lastUnitItem = UnitItem::whereIn('sub_item_id', $similarSubItems)
+                    ->orderBy('id', 'desc')
+                    ->first();
 
-            $sequenceNumber = $lastUnitItem ?
-                intval(substr($lastUnitItem->code_unit, -3)) + 1 : 1;
+                $sequenceNumber = $lastUnitItem ?
+                    intval(substr($lastUnitItem->code_unit, -2)) + 1 : 1;
+            }
 
             $codeUnit = $this->generateCodeUnit($subItem, $sequenceNumber);
 

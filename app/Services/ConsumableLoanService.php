@@ -10,7 +10,7 @@ class ConsumableLoanService
 {
     public function getAllConsumableLoans()
     {
-        return ConsumableLoan::all();
+        return ConsumableLoan::with(['student', 'teacher', 'consumableItem'])->get()    ;
     }
 
     public function createConsumableLoan(array $data)
@@ -68,7 +68,7 @@ class ConsumableLoanService
 
     public function getConsumableLoanById(ConsumableLoan $consumableLoan)
     {
-        return $consumableLoan;
+        return $consumableLoan->load(['student', 'teacher', 'consumableItem']);
     }
 
     public function updateConsumableLoan(ConsumableLoan $consumableLoan, array $data)

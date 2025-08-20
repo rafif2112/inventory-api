@@ -57,8 +57,10 @@ class UnitItemSeeder extends Seeder
         $words = explode(' ', $subItem->merk);
         $merkCode = strtoupper(substr($words[0], 0, 4));
 
-        $sequence = str_pad($number, 3, '0', STR_PAD_LEFT);
+        $sequence = str_pad($number, 2, '0', STR_PAD_LEFT);
 
-        return "{$majorCode}-{$merkCode}-{$sequence}";
+        $codeItem = $subItem->item->code_item ?? '0';
+
+        return "{$majorCode}-{$merkCode}-{$codeItem}{$sequence}";
     }
 }

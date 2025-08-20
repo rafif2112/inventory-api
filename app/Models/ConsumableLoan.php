@@ -34,4 +34,9 @@ class ConsumableLoan extends Model
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');
     }
+
+    public function major()
+    {
+        return $this->hasOneThrough(Major::class, ConsumableItem::class, 'consumable_item_id', 'major_id');
+    }
 }
