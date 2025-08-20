@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\AdminUser\DashboardController;
+use App\Http\Controllers\Dashboard\MobileDashboardController;
+use App\Http\Controllers\Dashboard\AdminUserDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SubItemController;
@@ -10,9 +11,10 @@ use App\Http\Controllers\ConsumableItemController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UnitItemController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\LogActivityController;
+use App\Http\Controllers\Dashboard\SuperadminDashboardController;
 use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,14 +38,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/user', [AuthController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::post('/student/import', [StudentController::class, 'import']);
-    Route::get('/student/data', [StudentController::class, 'getStudentData']);
-    Route::delete('/student/reset', [StudentController::class, 'resetData']);
-    Route::apiResource('/student', StudentController::class);
 
-    Route::get('/user/paginate', [UserController::class, 'indexPaginate']);
+    Route::post('/student/import', [StudentController::class, 'import']);
+
+    Route::apiResource('/student', StudentController::class);
     Route::apiResource('/user', UserController::class);
 
     Route::get('/item/paginate', [ItemController::class, 'itemPaginate']);
@@ -55,17 +56,19 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/major', MajorController::class);
 
     Route::get('/consumable-loan/history', [ConsumableLoanController::class, 'getConsumableLoanHistory']);
-    Route::apiResource('/consumable-loan', ConsumableLoanController::class);
 
-    Route::get('/consumable-item/data', [ConsumableItemController::class, 'getData']);
+    Route::apiResource('/item', ItemController::class);
+    Route::apiResource('/subitem', SubItemController::class);
+    Route::apiResource('/major', MajorController::class);
+    Route::apiResource('/consumable-loan', ConsumableLoanController::class);
     Route::apiResource('/consumable-item', ConsumableItemController::class);
+    Route::apiResource('/unit-items', UnitItemController::class);
 
     Route::post('/teacher/import', [TeacherController::class, 'import']);
     Route::get('/teacher/data', [TeacherController::class, 'getTeachersData']);
     Route::delete('/teacher/reset', [TeacherController::class, 'resetData']);
     Route::apiResource('/teacher', TeacherController::class);
 
-    Route::apiResource('/unit-items', UnitItemController::class);
 
     Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
     Route::get('/unit-loan/history', [UnitLoanController::class, 'getLoanHistory']);
@@ -82,7 +85,24 @@ Route::middleware('auth:api')->group(function () {
         Route::post('consumable-items', 'exportConsumableItems');
     });
 
-    Route::get('/latest-activity', [DashboardController::class, 'latestActivity']);
-    Route::get('/loan-report', [DashboardController::class, 'getLoanReport']);
+    Route::prefix('/dashboard')->group(function () {
+        Route::get('/loan-report', [AdminUserDashboardController::class, 'getLoanReport']);
 
+        Route::prefix('/mobile')->controller(MobileDashboardController::class)->group(function () {
+            Route::get('/card', 'getCardData');
+            Route::get('/latest-activity', 'latestActivity');
+        });
+
+        Route::prefix('/admin-user')->controller(AdminUserDashboardController::class)->group(function () {
+            Route::get('/latest-activity', 'latestActivity');
+            Route::get('/dashboard/item-count', 'itemCount');
+        });
+
+        Route::prefix('/superadmin')->controller(SuperadminDashboardController::class)->group(function () {
+            Route::get('/most-borrowed', 'indexBorrowing');
+            Route::get('/most-borrowed-percentage', 'indexAverageBorrowing');
+            Route::get('/major-loans', 'getMajorLoans');
+            Route::get('/items-loans-history', 'getItemsLoansHistory');
+        });
+    });
 });
