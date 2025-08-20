@@ -4,46 +4,69 @@ namespace App\Http\Controllers\Superadmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Teacher;
+use App\Models\Student;
+use App\Models\UnitItem;
+use App\Models\ConsumableItem;
 
 class DashboardController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * API Dashboard utama
      */
     public function index()
     {
-        //
+        $totalTeachers    = Teacher::count();
+        $totalStudents    = Student::count();
+        $totalUnitItems   = UnitItem::count();
+        $totalConsumables = ConsumableItem::count();
+        $latestUnitItems  = UnitItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalTeachers'    => $totalTeachers,
+            'totalStudents'    => $totalStudents,
+            'totalUnitItems'   => $totalUnitItems,
+            'totalConsumables' => $totalConsumables,
+            'latestUnitItems'  => $latestUnitItems
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function student()
     {
-        //
+        $totalStudents = Student::count();
+
+        return response()->json([
+            'totalStudents' => $totalStudents,
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function teacher()
     {
-        //
+        $totalTeachers = Teacher::count();
+
+        return response()->json([
+            'totalTeachers' => $totalTeachers,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function unitItem()
     {
-        //
+        $totalUnitItems  = UnitItem::count();
+        $latestUnitItems = UnitItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalUnitItems'  => $totalUnitItems,
+            'latestUnitItems' => $latestUnitItems,
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function consumable()
     {
-        //
+        $totalConsumables = ConsumableItem::count();
+
+        return response()->json([
+            'totalConsumables' => $totalConsumables,
+        ]);
     }
 }
+//     }

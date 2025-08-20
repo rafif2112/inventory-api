@@ -4,6 +4,12 @@ namespace App\Http\Controllers\AdminUser;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Teacher;
+use App\Models\Student;
+use App\Models\UnitItem;
+use App\Models\ConsumableItem;
+use App\Models\Item;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -12,38 +18,53 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        //
+        // Hitung total semua data
+        $totalUnitItems = UnitItem::count();
+        $totalConsumables = ConsumableItem::count();
+        $total = $totalUnitItems + $totalConsumables;
+
+
+        // Tampilkan data ke view
+        return view('admin.dashboard', [
+            'totalUnitItems' => $totalUnitItems,
+            'total' => $total,
+            'totalConsumables' => $totalConsumables,
+
+
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function unitItem()
     {
-        //
+        $totalUnitItems = UnitItem::count();
+        $latestUnitItems = UnitItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalUnitItems' => $totalUnitItems,
+            'latestUnitItems' => $latestUnitItems,
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function consumableItem()
     {
-        //
+        $totalConsumables = ConsumableItem::count();
+        $latestConsumables = ConsumableItem::latest()->take(5)->get();
+
+        return response()->json([
+            'totalConsumables' => $totalConsumables,
+            'latestConsumables' => $latestConsumables,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function item()
     {
-        //
+        $totalItems = Item::count();
+        $latestItems = Item::latest()->take(5)->get();
+
+        return response()->json([
+            'totalItems' => $totalItems,
+            'latestItems' => $latestItems,
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }
