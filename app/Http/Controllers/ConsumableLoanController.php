@@ -49,7 +49,7 @@ class ConsumableLoanController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => $th->getMessage()
             ], 500);
         }
@@ -87,7 +87,7 @@ class ConsumableLoanController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => $th->getMessage()
             ]);
         }
@@ -112,7 +112,7 @@ class ConsumableLoanController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to update data'
             ]);
         }
@@ -126,7 +126,7 @@ class ConsumableLoanController extends Controller
         try {
             if (!$consumableLoan) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => 404,
                     'message' => 'data not found'
                 ], 404);
             }
@@ -140,7 +140,7 @@ class ConsumableLoanController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to delete data'
             ]);
         }

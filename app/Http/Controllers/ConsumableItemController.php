@@ -153,7 +153,7 @@ class ConsumableItemController extends Controller
         try {
             if (!$consumableItem) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => 404,
                     'message' => 'data not found'
                 ], 404);
             }

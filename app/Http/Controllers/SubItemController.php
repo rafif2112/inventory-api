@@ -73,7 +73,7 @@ class SubItemController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to create sub item',
                 'error' => $e->getMessage(),
             ], 500);
@@ -119,7 +119,7 @@ class SubItemController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to update sub item',
                 'error' => $e->getMessage(),
             ], 500);

@@ -25,11 +25,11 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->userService->getAllUsers();
+        $data = $this->userService->getLoginUser();
 
         return response()->json([
             'status' => 200,
-            'data' => UserResource::collection($data),
+            'data' => $data
         ], 200);
     }
 
@@ -107,7 +107,7 @@ class UserController extends Controller
         } catch (\Throwable) {
             DB::rollBack();
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'Failed to update data',
             ]);
         }
@@ -121,7 +121,7 @@ class UserController extends Controller
         try {
             if (!$user) {
                 return response()->json([
-                    'status' => 'error',
+                    'status' => 404,
                     'message' => 'data not found',
                 ], 404);
             }
@@ -134,7 +134,7 @@ class UserController extends Controller
             ], 200);
         } catch (\Throwable) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => 'failed to delete data'
             ]);
         }

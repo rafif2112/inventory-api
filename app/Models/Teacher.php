@@ -25,5 +25,4 @@ class Teacher extends Model
     {
         return $this->hasMany(UnitLoan::class, 'teacher_id');
     }
-    
 }
