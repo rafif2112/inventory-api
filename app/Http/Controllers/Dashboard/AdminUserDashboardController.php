@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Admin\ItemCountResource;
 use App\Http\Resources\Admin\ItemBorrowPercentage;
+use App\Services\AdminUser\AdminDashboardService;
 use App\Models\SubItem;
 use App\Models\UnitItem;
 use App\Models\Teacher;
@@ -20,9 +21,12 @@ use App\Models\Item;
 
 class AdminUserDashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $adminDashboardService;
+
+    public function __construct(AdminDashboardService $adminDashboardService)
+    {
+        $this->adminDashboardService = $adminDashboardService;
+    }
 
     public function getItemsLoansHistory()
     {
@@ -55,30 +59,12 @@ class AdminUserDashboardController extends Controller
         ], 200);
     }
 
-    public function itemBorrowPercentage(Request $request)
-    {
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
-
-        $data = DB::table('sub_items')
-            ->join('items', 'sub_items.item_id', '=', 'items.id')
-            ->select('items.name', DB::raw('SUM(sub_items.stock) as total_stock'))
-            ->where('sub_items.major_id', Auth::user()->major_id)
-            ->when($startDate && $endDate && $startDate === $endDate, function ($query) use ($startDate) {
-                return $query->whereDate('borrowed_at', $startDate);
-            })
-            ->when($startDate && (!$endDate || $startDate !== $endDate), function ($query) use ($startDate) {
-                return $query->where('borrowed_at', '>=', $startDate);
-            })
-            ->when($endDate && (!$startDate || $startDate !== $endDate), function ($query) use ($endDate) {
-                return $query->where('borrowed_at', '<=', $endDate);
-            })
-            ->groupBy('items.name')
-            ->get();
+    public function indexAverageBorrowing(){
+        $data = $this->adminDashboardService->getAverageBorrowing();
 
         return response()->json([
             'status' => 200,
-            'data' => ItemBorrowPercentage::collection($data)
+            'data' => $data
         ], 200);
     }
     /**
