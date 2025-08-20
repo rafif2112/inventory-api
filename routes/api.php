@@ -15,7 +15,6 @@ use App\Http\Controllers\ConsumableLoanController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Superadmin\DashboardController;
 use App\Http\Controllers\UnitLoanController;
-use App\Http\Controllers\Superadmin\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -80,6 +79,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/unit-loan', UnitLoanController::class);
 
     Route::apiResource('/log-activity', LogActivityController::class)->only('index');
+
+    Route::get('/dashboard/item-count', [DashboardController::class, 'itemCount']);
 
     Route::prefix('/export')->controller(ExportController::class)->group(function () {
         Route::post('unit-loan', 'exportUnitLoan');
