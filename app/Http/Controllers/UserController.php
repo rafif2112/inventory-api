@@ -25,11 +25,11 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->userService->getAllUsers();
+        $data = $this->userService->getLoginUser();
 
         return response()->json([
             'status' => 200,
-            'data' => UserResource::collection($data),
+            'data' => $data
         ], 200);
     }
 
