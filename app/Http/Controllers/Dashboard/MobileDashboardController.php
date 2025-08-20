@@ -37,7 +37,7 @@ class MobileDashboardController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => $th->getMessage()
             ], 500);
         }
@@ -56,7 +56,7 @@ class MobileDashboardController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'error',
+                'status' => 500,
                 'message' => $th->getMessage()
             ], 500);
         }
