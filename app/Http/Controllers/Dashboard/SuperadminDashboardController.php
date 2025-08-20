@@ -9,7 +9,6 @@ use App\Models\ConsumableLoan;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Superadmin\CountTotalLoansResource;
-use App\Http\Resources\Superadmin\ItemsLoansHistoryResource;
 use App\Models\Item;
 use App\Models\UnitItem;
 use Illuminate\Http\Request;
@@ -36,7 +35,7 @@ class SuperadminDashboardController extends Controller
 
     //     return ItemsLoansHistoryResource::collection($items);
     // }
-    
+
     public function getMajorLoans()
     {
         $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
@@ -50,52 +49,24 @@ class SuperadminDashboardController extends Controller
         $totalStudents    = Student::count();
         $totalUnitItems   = UnitItem::count();
         $totalConsumables = ConsumableItem::count();
-        $latestUnitItems  = UnitItem::latest()->take(5)->get();
 
         return response()->json([
-            'totalTeachers'    => $totalTeachers,
-            'totalStudents'    => $totalStudents,
-            'totalUnitItems'   => $totalUnitItems,
-            'totalConsumables' => $totalConsumables,
-            'latestUnitItems'  => $latestUnitItems
+            'status' => 200,
+            'data' => [
+                'totalTeachers'    => $totalTeachers,
+                'totalStudents'    => $totalStudents,
+                'totalUnitItems'   => $totalUnitItems,
+                'totalConsumables' => $totalConsumables,
+            ]
         ]);
     }
 
-    public function student()
+    public function latestUnitItems()
     {
-        $totalStudents = Student::count();
-
-        return response()->json([
-            'totalStudents' => $totalStudents,
-        ]);
-    }
-
-    public function teacher()
-    {
-        $totalTeachers = Teacher::count();
-
-        return response()->json([
-            'totalTeachers' => $totalTeachers,
-        ]);
-    }
-
-    public function unitItem()
-    {
-        $totalUnitItems  = UnitItem::count();
         $latestUnitItems = UnitItem::latest()->take(5)->get();
 
         return response()->json([
-            'totalUnitItems'  => $totalUnitItems,
             'latestUnitItems' => $latestUnitItems,
-        ]);
-    }
-
-    public function consumable()
-    {
-        $totalConsumables = ConsumableItem::count();
-
-        return response()->json([
-            'totalConsumables' => $totalConsumables,
         ]);
     }
 
