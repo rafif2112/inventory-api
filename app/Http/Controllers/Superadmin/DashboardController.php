@@ -13,13 +13,22 @@ use App\Http\Resources\Superadmin\ItemsLoansHistoryResource;
 use App\Models\Item;
 use App\Models\UnitItem;
 use Illuminate\Http\Request;
+use App\Services\Superadmin\DashboardService;
 
 class DashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function getMajorLoans()
+    protected $dashboardService;
+
+    public function __construct(DashboardService $dashboardService)
+    {
+        $this->dashboardService = $dashboardService;
+    }
+
+
+    public function index()
     {
         $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
 
@@ -33,6 +42,13 @@ class DashboardController extends Controller
 
     //     return ItemsLoansHistoryResource::collection($items);
     // }
+    
+    public function getMajorLoans()
+    {
+        $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
+
+        return CountTotalLoansResource::collection($majors);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -41,28 +57,37 @@ class DashboardController extends Controller
     {
         //
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //
+    }
+
+
+    // Most of Borrowing
+
+
+    public function indexBorrowing()
+    {
+        $data = $this->dashboardService->getItemsSummary();
+
+        return response()->json([
+            'status' => 200,
+            'data' => $data,
+        ], 200);
+    }
+
+    public function indexAverageBorrowing()
+    {
+        $data = $this->dashboardService->getAverageBorrowing();
+
+        return response()->json([
+            'status' => 200,
+            'data' => $data,
+        ], 200);
     }
 }
