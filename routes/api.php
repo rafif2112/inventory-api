@@ -38,13 +38,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/user', [AuthController::class, 'index']);
+    // Route::get('/user', [AuthController::class, 'index']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
-
+    
     Route::post('/student/import', [StudentController::class, 'import']);
-
     Route::apiResource('/student', StudentController::class);
+
+    Route::get('/user/data', [UserController::class, 'getUsersData']);
     Route::apiResource('/user', UserController::class);
 
     Route::get('/item/paginate', [ItemController::class, 'itemPaginate']);
@@ -56,10 +56,6 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/major', MajorController::class);
 
     Route::get('/consumable-loan/history', [ConsumableLoanController::class, 'getConsumableLoanHistory']);
-
-    Route::apiResource('/item', ItemController::class);
-    Route::apiResource('/subitem', SubItemController::class);
-    Route::apiResource('/major', MajorController::class);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
 
     Route::get('/consumable-item/data', [ConsumableItemController::class, 'getData']);

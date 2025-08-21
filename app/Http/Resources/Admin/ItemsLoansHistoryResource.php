@@ -16,10 +16,10 @@ class ItemsLoansHistoryResource extends JsonResource
 {
     return [
         'id' => $this->id,
-        'item' => $this->item?->name,
-        'merk' => optional($this->subItem)->merk,
-        'procurement_date' => $this->procurement_date,
-        'code' => $this->code_unit,
+        'item' => $this->unitItem->subItem->item->name,
+        'merk' => $this->unitItem->subItem->merk,
+        'borrowed_at' => $this->borrowed_at,
+        'code' => $this->unitItem->code_unit,
     ];
 }
 }

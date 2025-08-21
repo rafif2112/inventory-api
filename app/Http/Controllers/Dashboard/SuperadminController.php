@@ -8,6 +8,7 @@ use App\Models\ConsumableLoan;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\ItemsLoansHistoryResource;
 use App\Http\Resources\Superadmin\CountTotalLoansResource;
 use App\Models\Item;
 use App\Models\UnitItem;
@@ -29,12 +30,24 @@ class SuperadminController extends Controller
         $this->dashboardService = $dashboardService;
     }
 
-    // public function getItemsLoansHistory()
-    // {
-    //     $items = UnitItem::with(['subItems', 'unitItems'])->get();
+    public function getItemsLoansHistory()
+    {
+        // $items = UnitItem::with(['subItem'])
+        //     ->latest()
+        //     ->take(5)
+        //     ->get();
 
-    //     return ItemsLoansHistoryResource::collection($items);
-    // }
+        $data = UnitLoan::with(['unitItem', 'unitItem.subItem', 'unitItem.subItem.item'])
+            ->where('status', 1)
+            ->latest()
+            ->take(5)
+            ->get();
+        
+        return response()->json([
+            'status' => 200,
+            'data' => ItemsLoansHistoryResource::collection($data)
+        ]);
+    }
 
     public function getMajorLoans(Request $request)
     {

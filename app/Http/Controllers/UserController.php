@@ -33,7 +33,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function indexPaginate(Request $request)
+    public function getUsersData(Request $request)
     {
 
         $search = $request->query('search', '');
@@ -43,7 +43,6 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 200,
-            'message' => 'Users retrieved successfully',
             'data' => UserResource::collection($users->items()),
             'meta' => new PaginationResource($users)
         ]);
