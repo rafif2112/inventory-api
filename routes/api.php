@@ -61,7 +61,10 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/subitem', SubItemController::class);
     Route::apiResource('/major', MajorController::class);
     Route::apiResource('/consumable-loan', ConsumableLoanController::class);
+
+    Route::get('/consumable-item/data', [ConsumableItemController::class, 'getData']);
     Route::apiResource('/consumable-item', ConsumableItemController::class);
+    
     Route::apiResource('/unit-items', UnitItemController::class);
 
     Route::post('/teacher/import', [TeacherController::class, 'import']);
@@ -104,6 +107,7 @@ Route::middleware('auth:api')->group(function () {
             Route::get('/most-borrowed-percentage', 'indexAverageBorrowing');
             Route::get('/major-loans', 'getMajorLoans');
             Route::get('/items-loans-history', 'getItemsLoansHistory');
+            Route::get('/card', 'index');
         });
     });
 });

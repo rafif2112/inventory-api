@@ -11,7 +11,7 @@ class AdminDashboardService
         // Ambil total peminjaman per kategori
         $borrowings = Item::select(
                 'items.name',
-                DB::raw('COUNT(unit_loans.id) as borrowed')
+                DB::raw('COUNT(unit_loans.id) as total_borrowed')
             )
             ->join('sub_items', 'sub_items.item_id', '=', 'items.id')
             ->join('unit_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
@@ -22,14 +22,14 @@ class AdminDashboardService
             ->get();
 
         // Hitung total semua peminjaman
-        $totalAll = $borrowings->sum('borrowed');
+        $totalAll = $borrowings->sum('total_borrowed');
 
         // Hitung rata-rata peminjaman
         $average = $borrowings->count() > 0 ? $totalAll / $borrowings->count() : 0;
 
         // Tambahin persentase ke setiap kategori
         $result = $borrowings->map(function ($item) use ($average) {
-            $item->persen = $average > 0 ? round(($item->borrowed / $average) * 100, 2) : 0;
+            $item->persen = $average > 0 ? round(($item->total_borrowed / $average) * 100, 2) : 0;
             return $item;
         });
 

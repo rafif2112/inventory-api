@@ -43,19 +43,24 @@ class AdminUserController extends Controller
         ]);
     }
 
-    public function itemCount()
+    public function itemCount(Request $request)
     {
-        $data = SubItem::where('major_id', Auth::user()->major_id)
-            ->with(['item'])
-            ->get()
-            ->map(function ($subItem) {
-                $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
-                return $subItem;
-            });
+        $user = Auth::user();
+
+        $data = Item::select('items.name', DB::raw('COUNT(unit_loans.id) as total_borrowed'))
+            ->join('sub_items', 'sub_items.item_id', '=', 'items.id')
+            ->join('unit_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
+            ->join('unit_loans', 'unit_loans.unit_item_id', '=', 'unit_items.id')
+            ->where('unit_loans.status', 1)
+            ->groupBy('items.id', 'items.name')
+            ->limit(5)
+            ->where('sub_items.major_id', $user->major_id)
+            ->orderByDesc('total_borrowed')
+            ->get();
 
         return response()->json([
             'status' => 200,
-            'data' => ItemcountResource::collection($data)
+            'data' => $data
         ], 200);
     }
 

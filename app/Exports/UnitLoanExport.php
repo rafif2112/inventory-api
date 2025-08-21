@@ -72,7 +72,7 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
     public function headings(): array
     {
         return [
-            'ID',
+            'No',
             'Item Type',
             'Unit Code',
             'Brand',
@@ -90,8 +90,9 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
 
     public function map($unitLoan): array
     {
+        static $number = 0;
         return [
-            $unitLoan->id,
+            ++$number,
             $unitLoan->unitItem->subItem->item->name ?? 'N/A',
             $unitLoan->unitItem->code_unit ?? 'N/A',
             $unitLoan->unitItem->subItem->merk ?? 'N/A',
