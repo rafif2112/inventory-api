@@ -17,7 +17,7 @@ use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\ConsumableItem;
 
-class SuperadminDashboardController extends Controller
+class SuperadminController extends Controller
 {
     /**
      * API Dashboard utama
@@ -36,11 +36,35 @@ class SuperadminDashboardController extends Controller
     //     return ItemsLoansHistoryResource::collection($items);
     // }
 
-    public function getMajorLoans()
+    public function getMajorLoans(Request $request)
     {
-        $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
+        $fromDate = $request->query('from', now()->startOfYear()->toDateString());
+        $toDate   = $request->query('to', now()->endOfYear()->toDateString());
 
-        return CountTotalLoansResource::collection($majors);
+        if ($fromDate > $toDate) {
+            [$fromDate, $toDate] = [$toDate, $fromDate];
+        }
+
+        $majors = Major::with([
+            'consumableLoans' => function($query) use ($fromDate, $toDate) {
+                $query->whereBetween('borrowed_at', [$fromDate, $toDate]);
+            },
+            'subItems.unitLoans' => function($query) use ($fromDate, $toDate) {
+                $query->whereBetween('borrowed_at', [$fromDate, $toDate]);
+            }
+        ])
+        ->get()
+        ->map(function($major) {
+            $consumableCount = $major->consumableLoans->count();
+            $unitCount = $major->subItems->sum(fn($sub) => $sub->unitLoans->count());
+            $major->setAttribute('count', $consumableCount + $unitCount);
+            return $major;
+        });
+
+        return response()->json([
+            'status' => 200,
+            'data' => CountTotalLoansResource::collection($majors),
+        ]);
     }
 
     public function index()

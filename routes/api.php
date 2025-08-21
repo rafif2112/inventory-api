@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\Dashboard\MobileDashboardController;
-use App\Http\Controllers\Dashboard\AdminUserDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SubItemController;
@@ -12,9 +10,11 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UnitItemController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConsumableLoanController;
+use App\Http\Controllers\Dashboard\AdminUserController;
+use App\Http\Controllers\Dashboard\MobileController;
+use App\Http\Controllers\Dashboard\SuperadminController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LogActivityController;
-use App\Http\Controllers\Dashboard\SuperadminDashboardController;
 use App\Http\Controllers\UnitLoanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -86,20 +86,20 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('/dashboard')->group(function () {
-        Route::get('/loan-report', [AdminUserDashboardController::class, 'getLoanReport']);
+        Route::get('/loan-report', [AdminUserController::class, 'getLoanReport']);
 
-        Route::prefix('/mobile')->controller(MobileDashboardController::class)->group(function () {
+        Route::prefix('/mobile')->controller(MobileController::class)->group(function () {
             Route::get('/card', 'getCardData');
             Route::get('/latest-activity', 'latestActivity');
         });
 
-        Route::prefix('/admin-user')->controller(AdminUserDashboardController::class)->group(function () {
+        Route::prefix('/admin-user')->controller(AdminUserController::class)->group(function () {
             Route::get('/latest-activity', 'latestActivity');
             Route::get('/item-count', 'itemCount');
             Route::get('/item-count-percentage', 'indexAverageBorrowing');
         });
 
-        Route::prefix('/superadmin')->controller(SuperadminDashboardController::class)->group(function () {
+        Route::prefix('/superadmin')->controller(SuperadminController::class)->group(function () {
             Route::get('/most-borrowed', 'indexBorrowing');
             Route::get('/most-borrowed-percentage', 'indexAverageBorrowing');
             Route::get('/major-loans', 'getMajorLoans');

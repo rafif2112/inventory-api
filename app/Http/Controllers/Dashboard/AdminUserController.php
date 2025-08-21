@@ -19,7 +19,7 @@ use App\Models\Student;
 use App\Models\ConsumableItem;
 use App\Models\Item;
 
-class AdminUserDashboardController extends Controller
+class AdminUserController extends Controller
 {
     protected $adminDashboardService;
 
@@ -169,6 +169,7 @@ class AdminUserDashboardController extends Controller
             ], 500);
         }
     }
+
 
     public function latestActivity(Request $request)
     {
