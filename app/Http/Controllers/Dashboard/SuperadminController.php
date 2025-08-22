@@ -40,9 +40,9 @@ class SuperadminController extends Controller
         $data = UnitLoan::with(['unitItem', 'unitItem.subItem', 'unitItem.subItem.item'])
             ->where('status', 1)
             ->latest()
-            ->take(5)
+            ->take(3)
             ->get();
-        
+
         return response()->json([
             'status' => 200,
             'data' => ItemsLoansHistoryResource::collection($data)

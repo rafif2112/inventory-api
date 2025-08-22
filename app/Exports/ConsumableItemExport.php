@@ -28,10 +28,7 @@ class ConsumableItemExport implements FromQuery, WithHeadings, WithMapping, With
     {
         $query = ConsumableItem::query()
             ->select('consumable_items.*')
-            ->with(['subItem', 'subItem.item', 'subItem.major'])
-            ->join('sub_items', 'consumable_items.sub_item_id', '=', 'sub_items.id')
-            ->join('items', 'sub_items.item_id', '=', 'items.id')
-            ->join('majors', 'sub_items.major_id', '=', 'majors.id');
+            ->join('majors', 'consumable_items.major_id', '=', 'majors.id');
 
         if ($this->exportType === 'selected' && !empty($this->selectedIds)) {
             $query->whereIn('consumable_items.id', $this->selectedIds);
@@ -40,8 +37,21 @@ class ConsumableItemExport implements FromQuery, WithHeadings, WithMapping, With
         if (!empty($this->filters['search'])) {
             $search = $this->filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('consumable_items.name', 'ILIKE', '%' . $search . '%');
+            $q->where('consumable_items.name', 'ILIKE', '%' . $search . '%')
+              ->orWhere('majors.name', 'ILIKE', '%' . $search . '%');
             });
+        }
+
+        if (!empty($this->filters['sort_type'])) {
+            $query->orderBy('consumable_items.name', $this->filters['sort_type']);
+        }
+
+        if (!empty($this->filters['sort_quantity'])) {
+            $query->orderBy('consumable_items.quantity', $this->filters['sort_quantity']);
+        }
+
+        if (!empty($this->filters['sort_major'])) {
+            $query->orderBy('majors.name', $this->filters['sort_major']);
         }
 
         return $query;
@@ -51,10 +61,9 @@ class ConsumableItemExport implements FromQuery, WithHeadings, WithMapping, With
     {
         return [
             'No',
-            'Code Unit',
-            'Added Date',
-            'Merk',
             'Item Name',
+            'Quantity',
+            'Unit',
             'Major Name',
         ];
     }
@@ -64,11 +73,10 @@ class ConsumableItemExport implements FromQuery, WithHeadings, WithMapping, With
         static $number = 0;
         return [
             ++$number,
-            $consumableItem->code_unit,
-            $consumableItem->created_at,
-            $consumableItem->subItem->merk ?? 'N/A',
-            $consumableItem->subItem->item->name ?? 'N/A',
-            $consumableItem->subItem->major->name ?? 'N/A',
+            $consumableItem->name,
+            $consumableItem->quantity,
+            $consumableItem->unit,
+            $consumableItem->major->name ?? 'N/A',
         ];
     }
 

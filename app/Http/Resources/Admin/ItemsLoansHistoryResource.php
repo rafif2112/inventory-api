@@ -20,6 +20,7 @@ class ItemsLoansHistoryResource extends JsonResource
         'merk' => $this->unitItem->subItem->merk,
         'borrowed_at' => $this->borrowed_at,
         'code' => $this->unitItem->code_unit,
+        'status' => $this->status,
     ];
 }
 }
