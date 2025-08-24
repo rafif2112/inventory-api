@@ -15,12 +15,14 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
     protected $exportType;
     protected $selectedIds;
     protected $filters;
+    protected $user;
 
-    public function __construct($exportType, $selectedIds = [], $filters = [])
+    public function __construct($exportType, $selectedIds = [], $filters = [], $user = null)
     {
         $this->exportType = $exportType;
         $this->selectedIds = $selectedIds;
         $this->filters = $filters;
+        $this->user = $user;
     }
 
     public function query()
@@ -41,6 +43,10 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
             } else {
                 $query->where('unit_loans.status', true);
             }
+        }
+
+        if ($this->user->role !== 'superadmin') {
+            $query->where('majors.id', $this->user->major_id);
         }
 
         if (!empty($this->filters['search'])) {

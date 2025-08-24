@@ -16,12 +16,14 @@ class ConsumableItemExport implements FromQuery, WithHeadings, WithMapping, With
     protected $exportType;
     protected $selectedIds;
     protected $filters;
+    protected $user;
 
-    public function __construct($exportType, $selectedIds = [], $filters = [])
+    public function __construct($exportType, $selectedIds = [], $filters = [], $user = null)
     {
         $this->exportType = $exportType;
         $this->selectedIds = $selectedIds;
         $this->filters = $filters;
+        $this->user = $user;
     }
 
     public function query()
@@ -40,6 +42,10 @@ class ConsumableItemExport implements FromQuery, WithHeadings, WithMapping, With
             $q->where('consumable_items.name', 'ILIKE', '%' . $search . '%')
               ->orWhere('majors.name', 'ILIKE', '%' . $search . '%');
             });
+        }
+
+        if ($this->user->role !== 'superadmin') {
+            $query->where('majors.id', $this->user->major_id);
         }
 
         if (!empty($this->filters['sort_type'])) {

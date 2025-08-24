@@ -18,11 +18,30 @@ class SubItemController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
         $search = $request->query('search');
-        $query = SubItem::with(['item', 'major']);
+        $sortByMajor = $request->query('sort_major');
+        $sortByMerk = $request->query('sort_merk');
+
+        $query = SubItem::with(['item', 'major'])
+            ->leftJoin('majors', 'sub_items.major_id', '=', 'majors.id');
+
+        if ($sortByMajor) {
+            $query->orderBy('majors.name', $sortByMajor);
+        }
+
+        if ($sortByMerk) {
+            $query->orderBy('sub_items.merk', $sortByMerk);
+        }
 
         if ($search) {
             $query->where('merk', 'ILIKE', "%{$search}%");
+        }
+
+        if ($user->role !== 'superadmin') {
+            $query->whereHas('major', function ($q) use ($user) {
+                $q->where('id', $user->major_id);
+            });
         }
 
         $data = $query->get()->map(function ($subItem) {
@@ -38,10 +57,19 @@ class SubItemController extends Controller
 
     public function SubItemPaginate(Request $request){
         $search = $request->query('search', '');
+        $sortByMajor = $request->query('sort_major');
+        $sortByMerk = $request->query('sort_merk');
 
         $data = SubItem::with(['item', 'major'])
+            ->leftJoin('majors', 'sub_items.major_id', '=', 'majors.id')
             ->when($search, fn($query) =>
                 $query->where('merk', 'ilike', "%{$search}%")
+            )
+            ->when($sortByMajor, fn($query) =>
+                $query->orderBy('majors.name', $sortByMajor)
+            )
+            ->when($sortByMerk, fn($query) =>
+                $query->orderBy('sub_items.merk', $sortByMerk)
             )
             ->latest()
             ->paginate(10);

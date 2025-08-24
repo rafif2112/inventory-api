@@ -15,12 +15,14 @@ class UnitItemExport implements FromQuery, WithHeadings, WithMapping, WithStyles
     protected $exportType;
     protected $selectedIds;
     protected $filters;
+    protected $user;
 
-    public function __construct($exportType, $selectedIds = [], $filters = [])
+    public function __construct($exportType, $selectedIds = [], $filters = [], $user = null)
     {
         $this->exportType = $exportType;
         $this->selectedIds = $selectedIds;
         $this->filters = $filters;
+        $this->user = $user;
     }
 
     public function query()
@@ -33,7 +35,11 @@ class UnitItemExport implements FromQuery, WithHeadings, WithMapping, WithStyles
             ->join('majors', 'sub_items.major_id', '=', 'majors.id');
 
         if ($this->exportType === 'selected' && !empty($this->selectedIds)) {
-            $query->whereIn('id', $this->selectedIds);
+            $query->whereIn('unit_items.id', $this->selectedIds);
+        }
+
+        if ($this->user->role !== 'superadmin') {
+            $query->where('majors.id', $this->user->major_id);
         }
 
         if (!empty($this->filters['search'])) {
@@ -50,7 +56,6 @@ class UnitItemExport implements FromQuery, WithHeadings, WithMapping, WithStyles
 
     public function headings(): array
     {
-        static $number = 0;
         return [
             'No',
             'Code Unit',

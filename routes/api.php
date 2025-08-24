@@ -42,6 +42,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     
     Route::post('/student/import', [StudentController::class, 'import']);
+    Route::get('/student/data', [StudentController::class, 'getStudentData']);
     Route::apiResource('/student', StudentController::class);
 
     Route::get('/user/data', [UserController::class, 'getUsersData']);
@@ -78,10 +79,12 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('/export')->controller(ExportController::class)->group(function () {
         Route::post('unit-loan', 'exportUnitLoan');
         Route::post('consumable-loan', 'exportConsumableLoan');
-        Route::post('students', 'exportStudents');
-        Route::post('teachers', 'exportTeachers');
+        Route::post('items', 'exportItems');
+        Route::post('sub-items', 'exportSubItems');
         Route::post('unit-items', 'exportUnitItems');
         Route::post('consumable-items', 'exportConsumableItems');
+        // Route::post('students', 'exportStudents');
+        // Route::post('teachers', 'exportTeachers');
     });
 
     Route::prefix('/dashboard')->group(function () {

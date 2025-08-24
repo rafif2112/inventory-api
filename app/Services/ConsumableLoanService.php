@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ConsumableItem;
 use App\Models\ConsumableLoan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ConsumableLoanService
@@ -43,11 +44,13 @@ class ConsumableLoanService
 
     public function getConsumableLoanHistory($search, $sortQuantity, $sortType, $perPage = 10)
     {
+        $user = Auth::user();
         $query = ConsumableLoan::query()
             ->select('consumable_loans.*', 'consumable_items.name')
             ->with(['student', 'student.major', 'teacher', 'consumableItem'])
             ->join('consumable_items', 'consumable_loans.consumable_item_id', '=', 'consumable_items.id')
             ->leftJoin('students', 'consumable_loans.student_id', '=', 'students.id')
+            ->leftJoin('majors', 'consumable_items.major_id', '=', 'majors.id')
             ->leftJoin('teachers', 'consumable_loans.teacher_id', '=', 'teachers.id')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -61,6 +64,9 @@ class ConsumableLoanService
             })
             ->when($sortQuantity, function ($query, $sortQuantity) {
                 $query->orderBy('quantity', $sortQuantity);
+            })
+            ->when($user->role !== 'superadmin', function ($query) use ($user) {
+                $query->where('majors.id', $user->major_id);
             });
 
         return $query->paginate($perPage);

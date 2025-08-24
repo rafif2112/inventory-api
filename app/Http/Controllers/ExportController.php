@@ -8,7 +8,10 @@ use App\Exports\StudentExport;
 use App\Exports\TeacherExport;
 use App\Exports\UnitItemExport;
 use App\Exports\ConsumableItemExport;
+use App\Exports\ItemExport;
+use App\Exports\SubItemExport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportController extends Controller
@@ -28,6 +31,7 @@ class ExportController extends Controller
             'sort_by_time' => 'string|nullable|in:asc,desc',
         ]);
 
+        $user = Auth::user();
         $exportType = $request->input('export');
         $selectedIds = $request->input('data', []);
         $filters = [
@@ -40,7 +44,7 @@ class ExportController extends Controller
         $filename = 'unit_loan_' . $filters['type'] . '_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
 
         return Excel::download(
-            new UnitLoanExport($exportType, $selectedIds, $filters),
+            new UnitLoanExport($exportType, $selectedIds, $filters, $user),
             $filename
         );
     }
@@ -59,6 +63,7 @@ class ExportController extends Controller
             'sort_quantity' => 'string|nullable|in:asc,desc',
         ]);
 
+        $user = Auth::user();
         $exportType = $request->input('export');
         $selectedIds = $request->input('data', []);
         $filters = [
@@ -70,7 +75,7 @@ class ExportController extends Controller
         $filename = 'consumable_loan_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
 
         return Excel::download(
-            new ConsumableLoanExport($exportType, $selectedIds, $filters),
+            new ConsumableLoanExport($exportType, $selectedIds, $filters, $user),
             $filename
         );
     }
@@ -145,6 +150,7 @@ class ExportController extends Controller
             'sort_major' => 'string|nullable|in:asc,desc',
         ]);
 
+        $user = Auth::user();
         $exportType = $request->input('export');
         $selectedIds = $request->input('data', []);
         $filters = [
@@ -158,7 +164,7 @@ class ExportController extends Controller
         $filename = 'unit_items_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
 
         return Excel::download(
-            new UnitItemExport($exportType, $selectedIds, $filters),
+            new UnitItemExport($exportType, $selectedIds, $filters, $user),
             $filename
         );
     }
@@ -178,6 +184,7 @@ class ExportController extends Controller
             'sort_major' => 'string|nullable|in:asc,desc',
         ]);
 
+        $user = Auth::user();
         $exportType = $request->input('export');
         $selectedIds = $request->input('data', []);
         $filters = [
@@ -190,7 +197,57 @@ class ExportController extends Controller
         $filename = 'consumable_items_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
 
         return Excel::download(
-            new ConsumableItemExport($exportType, $selectedIds, $filters),
+            new ConsumableItemExport($exportType, $selectedIds, $filters, $user),
+            $filename
+        );
+    }
+
+    public function exportItems(Request $request)
+    {
+        $request->validate([
+            'export' => 'required|in:selected,all',
+            'data' => 'array|required_if:export,selected',
+            'data.*' => 'uuid|exists:items,id',
+            'search' => 'string|nullable',
+        ]);
+
+        $exportType = $request->input('export');
+        $selectedIds = $request->input('data', []);
+        $filters = [
+            'search' => $request->input('search'),
+        ];
+
+        $filename = 'items_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+
+        return Excel::download(
+            new ItemExport($exportType, $selectedIds, $filters),
+            $filename
+        );
+    }
+
+    public function exportSubItems(Request $request)
+    {
+        $request->validate([
+            'export' => 'required|in:selected,all',
+            'data' => 'array|required_if:export,selected',
+            'data.*' => 'uuid|exists:sub_items,id',
+            'search' => 'string|nullable',
+            'sort_major' => 'string|nullable|in:asc,desc',
+            'sort_merk' => 'string|nullable|in:asc,desc',
+        ]);
+
+        $exportType = $request->input('export');
+        $selectedIds = $request->input('data', []);
+        $filters = [
+            'search' => $request->input('search'),
+            'sort_major' => $request->input('sort_major'),
+            'sort_merk' => $request->input('sort_merk'),
+        ];
+
+        $filename = 'sub_items_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+
+        return Excel::download(
+            new SubItemExport($exportType, $selectedIds, $filters),
             $filename
         );
     }
