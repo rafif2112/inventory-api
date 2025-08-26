@@ -44,8 +44,8 @@ class StudentController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => StudentResource::collection($data['data']),
-            'meta' => new PaginationResource($data['meta']),
+            'data' => StudentResource::collection($data),
+            'meta' => new PaginationResource($data),
         ], 200);
     }
 

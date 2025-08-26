@@ -9,136 +9,170 @@ use Illuminate\Support\Facades\Log;
 
 class StudentService
 {
-    public function getAllStudents()
+    // public function getAllStudents()
+    // {
+    //     $search = trim(request()->query('search', ''));
+
+    //     $studentsTimestamp = Student::max('updated_at') ?? now();
+    //     $dataVersion = md5($studentsTimestamp);
+
+    //     $allDataCacheKey = 'students_all_' . $dataVersion;
+
+    //     $allStudents = Cache::remember($allDataCacheKey, now()->addHours(1), function () {
+    //         return DB::select("
+    //             SELECT
+    //                 students.*,
+    //                 majors.id AS major_id,
+    //                 majors.name AS major_name,
+    //                 majors.icon,
+    //                 majors.color
+    //             FROM 
+    //                 students
+    //             LEFT JOIN 
+    //                 majors ON students.major_id = majors.id
+    //             ORDER BY students.nis ASC
+    //         ");
+    //     });
+
+    //     if (empty($search)) {
+    //         return $allStudents;
+    //     }
+
+    //     $searchLower = strtolower($search);
+    //     $filteredResults = array_values(array_filter($allStudents, function ($student) use ($searchLower) {
+    //         return str_contains(strtolower($student->nis ?? ''), $searchLower) ||
+    //             str_contains(strtolower($student->name ?? ''), $searchLower) ||
+    //             str_contains(strtolower($student->rayon ?? ''), $searchLower);
+    //     }));
+
+    //     return $filteredResults;
+    // }
+
+    // public function getStudentData($search = '', $sortMajor = 'asc', $page = 1, $perPage = 10)
+    // {
+    //     $page = max(1, (int) $page);
+    //     $perPage = max(1, (int) $perPage);
+    //     $searchParam = trim($search);
+    //     $sortOrder = strtolower($sortMajor) === 'desc' ? 'DESC' : 'ASC';
+
+    //     $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
+    //     $dataVersion = md5($latestStudentTimestamp);
+
+    //     // Include sort parameter in cache key
+    //     $allDataCacheKey = 'students_all_data_' . $dataVersion . '_' . md5($sortMajor);
+
+    //     $allStudents = Cache::remember($allDataCacheKey, now()->addHours(1), function () use ($sortOrder) {
+    //         return DB::select("
+    //         SELECT
+    //             students.*,
+    //             majors.id AS major_id,
+    //             majors.name AS major_name,
+    //             majors.icon,
+    //             majors.color
+    //         FROM
+    //             students
+    //         LEFT JOIN
+    //             majors ON students.major_id = majors.id
+    //         ORDER BY 
+    //             CASE WHEN majors.name IS NULL THEN 1 ELSE 0 END,
+    //             majors.name {$sortOrder},
+    //             students.nis ASC
+    //     ");
+    //     });
+
+    //     // Apply search filter if provided
+    //     if (!empty($searchParam)) {
+    //         $searchLower = strtolower($searchParam);
+    //         $allStudents = array_values(array_filter($allStudents, function ($student) use ($searchLower) {
+    //             return str_contains(strtolower($student->nis ?? ''), $searchLower) ||
+    //                 str_contains(strtolower($student->name ?? ''), $searchLower) ||
+    //                 str_contains(strtolower($student->rayon ?? ''), $searchLower);
+    //         }));
+
+    //         // Re-apply sort after filtering since array_filter can change order
+    //         usort($allStudents, function ($a, $b) use ($sortOrder) {
+    //             // Handle null major names
+    //             if (empty($a->major_name) && empty($b->major_name)) return 0;
+    //             if (empty($a->major_name)) return 1;
+    //             if (empty($b->major_name)) return -1;
+
+    //             $comparison = strcmp(strtolower($a->major_name), strtolower($b->major_name));
+    //             return $sortOrder === 'DESC' ? -$comparison : $comparison;
+    //         });
+    //     }
+
+    //     // Calculate pagination
+    //     $total = count($allStudents);   
+    //     $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
+
+    //     if ($page > $totalPages && $total > 0) {
+    //         $page = $totalPages;
+    //     }
+
+    //     $offset = ($page - 1) * $perPage;
+    //     $data = array_slice($allStudents, $offset, $perPage);
+
+    //     $hasData = !empty($data);
+    //     $from = $hasData && $total > 0 ? $offset + 1 : 0;
+    //     $to = $hasData ? $offset + count($data) : 0;
+
+    //     return [
+    //         'data' => $data,
+    //         'meta' => [
+    //             'current_page' => (int) $page,
+    //             'from' => (int) $from,
+    //             'last_page' => (int) $totalPages,
+    //             'per_page' => (int) $perPage,
+    //             'to' => (int) $to,
+    //             'total' => (int) $total,
+    //         ]
+    //     ];
+    // }
+
+    public function getStudentData($search = '', $sortMajor = 'asc', $page = 1, $perPage = 10)
     {
-        $search = trim(request()->query('search', ''));
+        $page = $search ? 1 : $page;
 
-        $studentsTimestamp = Student::max('updated_at') ?? now();
-        $dataVersion = md5($studentsTimestamp);
+        $query = Student::select('students.*')
+            ->with('major')
+            ->leftJoin('majors', 'students.major_id', '=', 'majors.id')
+            ->when(!empty(trim($search)), function ($q) use ($search) {
+                $searchLower = strtolower(trim($search));
+                $q->where(function ($q2) use ($searchLower) {
+                    $q2->where('students.nis', 'ILIKE', '%' . $searchLower . '%')
+                        ->orWhere('students.name', 'ILIKE', '%' . $searchLower . '%')
+                        ->orWhere('students.rayon', 'ILIKE', '%' . $searchLower . '%');
+                });
+            })
+            ->orderByRaw('CASE WHEN majors.name IS NULL THEN 1 ELSE 0 END')
+            ->when($sortMajor, function ($q) use ($sortMajor) {
+                $q->orderBy('majors.name', $sortMajor);
+            })
+            ->orderBy('students.nis', 'asc');
 
-        $allDataCacheKey = 'students_all_' . $dataVersion;
+        $students = $query->paginate($perPage, ['*'], 'page', $page);
 
-        $allStudents = Cache::remember($allDataCacheKey, now()->addHours(1), function () {
-            return DB::select("
-                SELECT
-                    students.*,
-                    majors.id AS major_id,
-                    majors.name AS major_name,
-                    majors.icon,
-                    majors.color
-                FROM 
-                    students
-                LEFT JOIN 
-                    majors ON students.major_id = majors.id
-                ORDER BY students.nis ASC
-            ");
-        });
-
-        if (empty($search)) {
-            return $allStudents;
-        }
-
-        $searchLower = strtolower($search);
-        $filteredResults = array_values(array_filter($allStudents, function ($student) use ($searchLower) {
-            return str_contains(strtolower($student->nis ?? ''), $searchLower) ||
-                str_contains(strtolower($student->name ?? ''), $searchLower) ||
-                str_contains(strtolower($student->rayon ?? ''), $searchLower);
-        }));
-
-        return $filteredResults;
+        return $students;
     }
 
-    public function getStudentData($search = '', $sortMajor, $page = 1, $perPage = 10)
+    public function getAllStudents($search = '')
     {
-        $page = max(1, (int) $page);
-        $perPage = max(1, (int) $perPage);
-        $searchParam = trim($search);
-        $sortOrder = $sortMajor === 'desc' ? 'DESC' : 'ASC';
+        $query = Student::select('students.*')
+            ->with('major')
+            ->leftJoin('majors', 'students.major_id', '=', 'majors.id')
+            ->when(!empty(trim($search)), function ($q) use ($search) {
+                $searchLower = strtolower(trim($search));
+                $q->where(function ($q2) use ($searchLower) {
+                    $q2->where('students.nis', 'ILIKE', '%' . $searchLower . '%')
+                        ->orWhere('students.name', 'ILIKE', '%' . $searchLower . '%')
+                        ->orWhere('students.rayon', 'ILIKE', '%' . $searchLower . '%');
+                });
+            })
+            ->orderBy('students.nis', 'asc');
 
-        $latestStudentTimestamp = Student::latest('updated_at')->value('updated_at');
-        $dataVersion = md5($latestStudentTimestamp);
+        $students = $query->get();
 
-        $allDataCacheKey = 'students_all_data_' . $dataVersion . '_' . md5($sortMajor);
-
-        $allStudents = Cache::remember($allDataCacheKey, now()->addHours(1), function () use ($sortOrder) {
-            return DB::select("
-            SELECT
-                students.*,
-                majors.id AS major_id,
-                majors.name AS major_name,
-                majors.icon,
-                majors.color
-            FROM
-                students
-            LEFT JOIN
-                majors ON students.major_id = majors.id
-            ORDER BY 
-                students.nis ASC
-        ");
-        });
-
-        if (empty($searchParam)) {
-            $total = count($allStudents);
-            $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
-
-            if ($page > $totalPages && $total > 0) {
-                $page = $totalPages;
-            }
-
-            $offset = ($page - 1) * $perPage;
-            $data = array_slice($allStudents, $offset, $perPage);
-
-            $hasData = !empty($data);
-            $from = $hasData && $total > 0 ? $offset + 1 : 0;
-            $to = $hasData ? $offset + count($data) : 0;
-
-            return [
-                'data' => $data,
-                'meta' => [
-                    'current_page' => (int) $page,
-                    'from' => (int) $from,
-                    'last_page' => (int) $totalPages,
-                    'per_page' => (int) $perPage,
-                    'to' => (int) $to,
-                    'total' => (int) $total,
-                ]
-            ];
-        }
-
-        $searchLower = strtolower($searchParam);
-        $filteredResults = array_values(array_filter($allStudents, function ($student) use ($searchLower) {
-            return str_contains(strtolower($student->nis ?? ''), $searchLower) ||
-                str_contains(strtolower($student->name ?? ''), $searchLower) ||
-                str_contains(strtolower($student->rayon ?? ''), $searchLower);
-        }));
-
-        $total = count($filteredResults);
-        $totalPages = $total > 0 ? ceil($total / $perPage) : 1;
-
-        if ($page > $totalPages && $total > 0) {
-            $page = $totalPages;
-        }
-
-        $offset = ($page - 1) * $perPage;
-        $data = array_slice($filteredResults, $offset, $perPage);
-
-        $hasData = !empty($data);
-        $from = $hasData && $total > 0 ? $offset + 1 : 0;
-        $to = $hasData ? $offset + count($data) : 0;
-
-        $result = [
-            'data' => $data,
-            'meta' => [
-                'current_page' => (int) $page,
-                'from' => (int) $from,
-                'last_page' => (int) $totalPages,
-                'per_page' => (int) $perPage,
-                'to' => (int) $to,
-                'total' => (int) $total,
-            ]
-        ];
-
-        return $result;
+        return $students;
     }
 
     /**

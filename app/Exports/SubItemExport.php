@@ -54,6 +54,7 @@ class SubItemExport implements WithHeadings, WithStyles, WithMapping, FromQuery,
     {
         return [
             'No',
+            'Type',
             'Merk',
             'Major',
         ];
@@ -64,6 +65,7 @@ class SubItemExport implements WithHeadings, WithStyles, WithMapping, FromQuery,
         static $counter = 0;
         return [
             ++$counter,
+            $row->item->name,
             $row->merk,
             $row->major->name,
         ];

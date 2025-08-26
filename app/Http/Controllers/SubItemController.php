@@ -23,7 +23,8 @@ class SubItemController extends Controller
         $sortByMajor = $request->query('sort_major');
         $sortByMerk = $request->query('sort_merk');
 
-        $query = SubItem::with(['item', 'major'])
+        $query = SubItem::select('sub_items.*')
+            ->with(['item', 'major'])
             ->leftJoin('majors', 'sub_items.major_id', '=', 'majors.id');
 
         if ($sortByMajor) {
@@ -60,7 +61,8 @@ class SubItemController extends Controller
         $sortByMajor = $request->query('sort_major');
         $sortByMerk = $request->query('sort_merk');
 
-        $data = SubItem::with(['item', 'major'])
+        $query = SubItem::select('sub_items.*')
+            ->with(['item', 'major'])
             ->leftJoin('majors', 'sub_items.major_id', '=', 'majors.id')
             ->when($search, fn($query) =>
                 $query->where('merk', 'ilike', "%{$search}%")
@@ -71,12 +73,17 @@ class SubItemController extends Controller
             ->when($sortByMerk, fn($query) =>
                 $query->orderBy('sub_items.merk', $sortByMerk)
             )
-            ->latest()
+            ->orderBy('sub_items.created_at', 'desc')
             ->paginate(10);
+
+        $data = $query->map(function ($subItem) {
+            $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
+            return $subItem;
+        });
 
         return response()->json([
             'status' => 200,
-            'data' => SubItemResource::collection($data->items()),
+            'data' => SubItemResource::collection($data),
             'meta' => new PaginationResource($data),
         ], 200);
     }
