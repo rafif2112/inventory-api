@@ -160,13 +160,10 @@ class StudentService
         $query = Student::select('students.*')
             ->with('major')
             ->leftJoin('majors', 'students.major_id', '=', 'majors.id')
-            ->when(!empty(trim($search)), function ($q) use ($search) {
-                $searchLower = strtolower(trim($search));
-                $q->where(function ($q2) use ($searchLower) {
-                    $q2->where('students.nis', 'ILIKE', '%' . $searchLower . '%')
-                        ->orWhere('students.name', 'ILIKE', '%' . $searchLower . '%')
-                        ->orWhere('students.rayon', 'ILIKE', '%' . $searchLower . '%');
-                });
+            ->when(!empty($search), function ($q) use ($search) {
+                $q->where('students.nis', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('students.name', 'ILIKE', '%' . $search . '%')
+                    ->orWhere('students.rayon', 'ILIKE', '%' . $search . '%');
             })
             ->orderBy('students.nis', 'asc');
 

@@ -27,7 +27,8 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->studentService->getAllStudents();
+        $search = $request->query('search', '');
+        $data = $this->studentService->getAllStudents($search);
 
         return response()->json([
             'status' => 200,

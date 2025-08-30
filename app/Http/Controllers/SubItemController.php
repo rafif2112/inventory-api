@@ -59,7 +59,7 @@ class SubItemController extends Controller
     public function SubItemPaginate(Request $request){
         $search = $request->query('search', '');
         $sortByMajor = $request->query('sort_major');
-        $sortByMerk = $request->query('sort_merk');
+        $sortByMerk = $request->query('sort_brand');
 
         $query = SubItem::select('sub_items.*')
             ->with(['item', 'major'])
