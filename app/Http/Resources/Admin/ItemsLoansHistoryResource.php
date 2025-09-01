@@ -18,7 +18,7 @@ class ItemsLoansHistoryResource extends JsonResource
         'id' => $this->id,
         'item' => $this->unitItem->subItem->item->name,
         'merk' => $this->unitItem->subItem->merk,
-        'borrowed_at' => $this->borrowed_at,
+        'borrowed_at' => $this->status === true ? $this->borrowed_at : $this->returned_at,
         'code' => $this->unitItem->code_unit,
         'status' => $this->status,
     ];

@@ -183,7 +183,17 @@ class AdminUserController extends Controller
 
         $latestLoans = UnitLoan::with('unitItem.subItem')
             ->latestByMajor($majorId, 3)
-            ->get();
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'id' => $loan->id,
+                    'item_name' => $loan->unitItem->subItem->item->name,
+                    'merk' => $loan->unitItem->subItem->merk,
+                    'unit_code' => $loan->unitItem->code_unit,
+                    'date_time' => $loan->status === true ? $loan->borrowed_at : $loan->returned_at,
+                    'status' => $loan->status,
+                ];
+            });
 
         return response()->json([
             'status' => 200,

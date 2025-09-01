@@ -32,13 +32,7 @@ class SuperadminController extends Controller
 
     public function getItemsLoansHistory()
     {
-        // $items = UnitItem::with(['subItem'])
-        //     ->latest()
-        //     ->take(5)
-        //     ->get();
-
         $data = UnitLoan::with(['unitItem', 'unitItem.subItem', 'unitItem.subItem.item'])
-            ->where('status', 1)
             ->latest()
             ->take(3)
             ->get();
