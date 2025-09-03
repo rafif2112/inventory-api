@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -73,6 +74,14 @@ class Handler extends ExceptionHandler
                 'status' => 'error',
                 'message' => 'Resource not found'
             ], 404);
+        }
+
+        if ($exception instanceof AccessDeniedHttpException) {
+            return response()->json([
+                'status' => '403',
+                'error' => 'Forbidden',
+                'message' => 'You do not have permission to access this resource.'
+            ], 403);
         }
 
         return parent::render($request, $exception);

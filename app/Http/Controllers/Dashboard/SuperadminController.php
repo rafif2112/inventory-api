@@ -17,6 +17,7 @@ use App\Services\Superadmin\DashboardService;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\ConsumableItem;
+use Illuminate\Support\Facades\Auth;
 
 class SuperadminController extends Controller
 {
@@ -39,6 +40,7 @@ class SuperadminController extends Controller
 
         return response()->json([
             'status' => 200,
+            'role' => Auth::user()->role,
             'data' => ItemsLoansHistoryResource::collection($data)
         ]);
     }
