@@ -54,7 +54,6 @@ class UserController extends Controller
     public function store(StoreValidate $request)
     {
         $data = $request->validated();
-
         DB::beginTransaction();
         try {
             $newData = $this->userService->createUser($data);
@@ -69,6 +68,7 @@ class UserController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => 400,
+                'errors' => $th->getMessage(),
                 'message' => 'failed to create new data'
             ], 400);
         }

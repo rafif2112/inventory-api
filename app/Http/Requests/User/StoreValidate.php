@@ -23,7 +23,7 @@ class StoreValidate extends FormRequest
     {
         return [
             'name' => 'required',
-            'username' => 'required',
+            'username' => 'required|unique:users,username',
             'role' => 'required|in:superadmin,admin,user',
             // 'email_verified_at' => 'required',
             'password' => 'required',
