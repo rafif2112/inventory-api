@@ -7,7 +7,7 @@ use App\Services\AdminUser\MobileDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class MobileDashboardController extends Controller
+class MobileController extends Controller
 {
     protected $mobileDashboardService;
 

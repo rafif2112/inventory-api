@@ -15,12 +15,14 @@ class ConsumableLoanExport implements FromQuery, WithHeadings, WithMapping, With
     protected $exportType;
     protected $selectedIds;
     protected $filters;
+    protected $user;
 
-    public function __construct($exportType, $selectedIds = [], $filters = [])
+    public function __construct($exportType, $selectedIds = [], $filters = [], $user = null)
     {
         $this->exportType = $exportType;
         $this->selectedIds = $selectedIds;
         $this->filters = $filters;
+        $this->user = $user;
     }
 
     public function query()
@@ -28,6 +30,7 @@ class ConsumableLoanExport implements FromQuery, WithHeadings, WithMapping, With
         $query = ConsumableLoan::query()
             ->with(['consumableItem', 'student', 'student.major', 'teacher'])
             ->join('consumable_items', 'consumable_loans.consumable_item_id', '=', 'consumable_items.id')
+            ->leftJoin('majors', 'consumable_items.major_id', '=', 'majors.id')
             ->leftJoin('students', 'consumable_loans.student_id', '=', 'students.id')
             ->leftJoin('teachers', 'consumable_loans.teacher_id', '=', 'teachers.id');
 
@@ -39,6 +42,10 @@ class ConsumableLoanExport implements FromQuery, WithHeadings, WithMapping, With
                     ->orWhere('students.name', 'ILIKE', '%' . $search . '%')
                     ->orWhere('teachers.name', 'ILIKE', '%' . $search . '%');
             });
+        }
+
+        if ($this->user->role !== 'superadmin') {
+            $query->where('majors.id', $this->user->major_id);
         }
 
         // Apply sorting

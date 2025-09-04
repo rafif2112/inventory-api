@@ -49,6 +49,27 @@ class UnitItemService
         return $query->paginate(10);
     }
 
+    public function getListUnitItem($user, $search)
+    {
+        $query = UnitItem::query()
+            ->select('unit_items.*')
+            ->with('subItem', 'subItem.item', 'subItem.major')
+            ->join('sub_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
+            ->join('items', 'sub_items.item_id', '=', 'items.id')
+            ->join('majors', 'sub_items.major_id', '=', 'majors.id')
+            ->where('unit_items.status', true)
+            ->where('unit_items.condition', true)
+            ->when($search, function ($q) use ($search) {
+                $q->where('unit_items.code_unit', 'ILIKE', '%' . $search . '%');
+            });
+
+        // if ($user->role != 'superadmin' && !empty($user->role)) {
+        //     $query->where('sub_items.major_id', $user->major_id);
+        // }
+
+        return $query->get();
+    }
+
 
     private function generateCodeUnit($subItem, int $number): string
     {

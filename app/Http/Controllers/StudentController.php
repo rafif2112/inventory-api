@@ -27,7 +27,8 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $data = $this->studentService->getAllStudents();
+        $search = $request->query('search', '');
+        $data = $this->studentService->getAllStudents($search);
 
         return response()->json([
             'status' => 200,
@@ -44,8 +45,8 @@ class StudentController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => StudentResource::collection($data['data']),
-            'meta' => new PaginationResource($data['meta']),
+            'data' => StudentResource::collection($data),
+            'meta' => new PaginationResource($data),
         ], 200);
     }
 

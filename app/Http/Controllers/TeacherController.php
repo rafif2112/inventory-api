@@ -35,14 +35,13 @@ class TeacherController extends Controller
     public function getTeachersData(Request $request)
     {
         $search = $request->query('search', '');
-        $page = $request->query('page', 1);
 
-        $teachersData = $this->teacherService->getTeachersData($search, $page);
+        $teachersData = $this->teacherService->getTeachersData($search, $request);
 
         return response()->json([
             'status' => 200,
-            'data' => TeacherResource::collection($teachersData['data']),
-            'meta' => new PaginationResource($teachersData['meta']),
+            'data' => TeacherResource::collection($teachersData),
+            'meta' => new PaginationResource($teachersData),
         ], 200);
     }
 

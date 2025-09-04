@@ -18,11 +18,31 @@ class SubItemController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
         $search = $request->query('search');
-        $query = SubItem::with(['item', 'major']);
+        $sortByMajor = $request->query('sort_major');
+        $sortByMerk = $request->query('sort_merk');
+
+        $query = SubItem::select('sub_items.*')
+            ->with(['item', 'major'])
+            ->leftJoin('majors', 'sub_items.major_id', '=', 'majors.id');
+
+        if ($sortByMajor) {
+            $query->orderBy('majors.name', $sortByMajor);
+        }
+
+        if ($sortByMerk) {
+            $query->orderBy('sub_items.merk', $sortByMerk);
+        }
 
         if ($search) {
             $query->where('merk', 'ILIKE', "%{$search}%");
+        }
+
+        if ($user->role !== 'superadmin') {
+            $query->whereHas('major', function ($q) use ($user) {
+                $q->where('id', $user->major_id);
+            });
         }
 
         $data = $query->get()->map(function ($subItem) {
@@ -38,17 +58,32 @@ class SubItemController extends Controller
 
     public function SubItemPaginate(Request $request){
         $search = $request->query('search', '');
+        $sortByMajor = $request->query('sort_major');
+        $sortByMerk = $request->query('sort_brand');
 
-        $data = SubItem::with(['item', 'major'])
+        $query = SubItem::select('sub_items.*')
+            ->with(['item', 'major'])
+            ->leftJoin('majors', 'sub_items.major_id', '=', 'majors.id')
             ->when($search, fn($query) =>
                 $query->where('merk', 'ilike', "%{$search}%")
             )
-            ->latest()
+            ->when($sortByMajor, fn($query) =>
+                $query->orderBy('majors.name', $sortByMajor)
+            )
+            ->when($sortByMerk, fn($query) =>
+                $query->orderBy('sub_items.merk', $sortByMerk)
+            )
+            ->orderBy('sub_items.created_at', 'desc')
             ->paginate(10);
+
+        $data = $query->map(function ($subItem) {
+            $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
+            return $subItem;
+        });
 
         return response()->json([
             'status' => 200,
-            'data' => SubItemResource::collection($data->items()),
+            'data' => SubItemResource::collection($data),
             'meta' => new PaginationResource($data),
         ], 200);
     }

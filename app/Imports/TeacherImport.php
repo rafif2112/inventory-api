@@ -20,7 +20,7 @@ class TeacherImport implements ToModel, WithHeadingRow, WithValidation
             ['nip' => $row['nip'] ?? $row['Nip'] ?? $row['NIP'] ?? null],
             [
                 'name' => $row['nama'] ?? $row['Nama'] ?? $row['NAMA'] ?? null,
-                'telephone' => $row['no_telepon'] ?? $row['No_Telepon'] ?? $row['NO_TELEPON'] ?? null,
+                'telephone' => $row['no_telepon'] ?? $row['No_Telepon'] ?? $row['NO_TELEPON'] ?? $row['no_telp'] ?? $row['No_Telp'] ?? $row['NO_TELP'] ?? $row['telepon'] ?? $row['Telepon'] ?? $row['TELEPON'] ?? $row['no telepon'] ?? $row['No Telepon'] ?? $row['NO TELEPON'] ?? null,
             ]
         );
     }

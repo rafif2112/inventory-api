@@ -8,6 +8,7 @@ use App\Models\ConsumableLoan;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\ItemsLoansHistoryResource;
 use App\Http\Resources\Superadmin\CountTotalLoansResource;
 use App\Models\Item;
 use App\Models\UnitItem;
@@ -16,8 +17,9 @@ use App\Services\Superadmin\DashboardService;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\ConsumableItem;
+use Illuminate\Support\Facades\Auth;
 
-class SuperadminDashboardController extends Controller
+class SuperadminController extends Controller
 {
     /**
      * API Dashboard utama
@@ -29,18 +31,49 @@ class SuperadminDashboardController extends Controller
         $this->dashboardService = $dashboardService;
     }
 
-    // public function getItemsLoansHistory()
-    // {
-    //     $items = UnitItem::with(['subItems', 'unitItems'])->get();
-
-    //     return ItemsLoansHistoryResource::collection($items);
-    // }
-
-    public function getMajorLoans()
+    public function getItemsLoansHistory()
     {
-        $majors = Major::with(['consumableLoans', 'subItems.unitLoans'])->get();
+        $data = UnitLoan::with(['unitItem', 'unitItem.subItem', 'unitItem.subItem.item'])
+            ->latest()
+            ->take(3)
+            ->get();
 
-        return CountTotalLoansResource::collection($majors);
+        return response()->json([
+            'status' => 200,
+            'role' => Auth::user()->role,
+            'data' => ItemsLoansHistoryResource::collection($data)
+        ]);
+    }
+
+    public function getMajorLoans(Request $request)
+    {
+        $fromDate = $request->query('from', now()->startOfYear()->toDateString());
+        $toDate   = $request->query('to', now()->endOfYear()->toDateString());
+
+        if ($fromDate > $toDate) {
+            [$fromDate, $toDate] = [$toDate, $fromDate];
+        }
+
+        $majors = Major::with([
+            'consumableLoans' => function($query) use ($fromDate, $toDate) {
+                $query->whereBetween('borrowed_at', [$fromDate, $toDate]);
+            },
+            'subItems.unitLoans' => function($query) use ($fromDate, $toDate) {
+                $query->whereBetween('borrowed_at', [$fromDate, $toDate]);
+            }
+        ])
+        ->get()
+        ->map(function($major) {
+            $consumableCount = $major->consumableLoans->count();
+            $unitCount = $major->subItems->sum(fn($sub) => $sub->unitLoans->count());
+            $major->setAttribute('count', $consumableCount + $unitCount);
+            return $major;
+        });
+
+        return response()->json([
+            'status' => 200,
+            'data' => CountTotalLoansResource::collection($majors),
+        ]);
     }
 
     public function index()

@@ -18,13 +18,10 @@ class CountTotalLoansResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $arr = [
+        return [
             'id' => $this->id,
             'major' => $this->name,
-            'count' => $this->consumableLoans->count()
-                + $this->subItems->sum(fn($sub) => $sub->unitLoans->count()),
+            'count' => $this->count,
         ];
-
-        return $arr;
     }
 }

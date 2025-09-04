@@ -72,4 +72,18 @@ return [
         'secret' => env('PASSPORT_PERSONAL_ACCESS_CLIENT_SECRET'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Token Expiration
+    |--------------------------------------------------------------------------
+    */
+
+    'tokens' => [
+        'expire_in' => 60, // dalam menit
+    ],
+
+    'refresh_tokens' => [
+        'expire_in' => 1440, // dalam menit (24 jam)
+    ],
+
 ];

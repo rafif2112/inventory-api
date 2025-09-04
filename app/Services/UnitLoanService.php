@@ -7,6 +7,7 @@ use App\Models\UnitLoan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class UnitLoanService
@@ -26,7 +27,17 @@ class UnitLoanService
      */
     public function getLoanByUnitCode(string $codeUnit)
     {
-        $unitItem = UnitItem::with(['subItem', 'subItem.item'])->where('code_unit', $codeUnit)->first();
+        $user = Auth::user();
+        
+        $unitItem = UnitItem::with(['subItem', 'subItem.item', 'subItem.major'])
+            ->where('code_unit', $codeUnit)
+            ->when($user->role !== 'superadmin', function ($query) use ($user) {
+                $query->whereHas('subItem.major', function ($q) use ($user) {
+                    $q->where('id', $user->major_id);
+                });
+            })
+            ->first();
+
         if (!$unitItem) {
             return [
                 'found' => false,
@@ -35,7 +46,7 @@ class UnitLoanService
             ];
         }
 
-        $unitLoan = UnitLoan::where('unit_item_id', $unitItem->id)
+        $unitLoan = UnitLoan::where('unit_item_id', (string) $unitItem->id)
             ->where('status', true)
             ->whereNull('returned_at')
             ->with(['student', 'teacher', 'unitItem'])
@@ -127,7 +138,7 @@ class UnitLoanService
 
             $updateData = [
                 'student_id' => $data['student_id'] ?? $unitLoan->student_id,
-                'teacher_id' => $data['teacher_id'] ?? $unitLoan->teacher_id,   
+                'teacher_id' => $data['teacher_id'] ?? $unitLoan->teacher_id,
                 'borrowed_by' => $data['borrowed_by'] ?? $unitLoan->borrowed_by,
                 'borrowed_at' => $data['borrowed_at'] ?? $unitLoan->borrowed_at,
                 'returned_at' => $data['returned_at'] ?? $unitLoan->returned_at,
@@ -184,6 +195,7 @@ class UnitLoanService
 
     public function getLoanHistory($sortTime, $sortType, $search, $data, $page = 1, $perPage = 10)
     {
+        $user = Auth::user();
         $query = UnitLoan::query()
             ->select('unit_loans.*')
             ->with(['unitItem', 'student', 'student.major', 'teacher', 'unitItem.subItem', 'unitItem.subItem.item'])
@@ -203,6 +215,9 @@ class UnitLoanService
             })
             ->when($sortTime, function ($q) use ($sortTime) {
                 $q->orderBy('unit_loans.borrowed_at', $sortTime);
+            })
+            ->when($user->role !== 'superadmin', function ($query) use ($user) {
+                $query->where('majors.id', $user->major_id);
             });
 
         if (!empty($search)) {

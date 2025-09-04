@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\TokenExpiredException;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,24 +17,40 @@ class AuthController extends Controller
     public function index()
     {
         $userId = Auth::id();
+        $user = Auth::user();
+
+        $this->checkTokenExpiration($user);
 
         return response()->json([
             'status' => 200,
-            'data' => [
-                'user_id' => $userId,
-                'name' => Auth::user()->name,
-                'username' => Auth::user()->username,
-                'role' => Auth::user()->role,
-            ]
+            'data' => new UserResource($user)
         ], 200);
     }
 
-    public function getLimiterKey(Request $request) {
+    private function checkTokenExpiration($user)
+    {
+        $token = $user->token();
+        
+        if ($token && $token->expires_at && $token->expires_at->isPast()) {
+            $token->delete();
+            throw new TokenExpiredException();
+        }
+    }
+
+    public function getLimiterKey(Request $request)
+    {
         return RateLimiter::availableIn($request->ip());
     }
 
     public function login(Request $request)
     {
+        if (Auth::check()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'User already logged in.',
+            ]);
+        }
+
         $credentials = $request->validate([
             'username' => 'required',
             'password' => 'required',
@@ -63,6 +81,11 @@ class AuthController extends Controller
         // Clear rate limiter on successful login
         RateLimiter::clear($limiterKey);
 
+        $tokenResult = $user->createToken('wikventory');
+        $token = $tokenResult->token;
+        $token->expires_at = now()->addHour();
+        $token->save();
+
         return response()->json([
             'status' => 200,
             'data' => [
@@ -72,7 +95,8 @@ class AuthController extends Controller
                 'role' => $user->role,
                 'major_id' => $user->major_id,
             ],
-            'token' => $user->createToken('wikventory')->accessToken,
+            'token' => $tokenResult->accessToken,
+            'expires_at' => $token->expires_at,
         ], 200);
     }
 
@@ -84,6 +108,28 @@ class AuthController extends Controller
         return response()->json([
             'status' => 200,
             'message' => "berhasil logout"
+        ], 200);
+    }
+
+    public function checkToken()
+    {
+        $user = Auth::user();
+        $token = $user->token();
+        
+        if (!$token) {
+            throw new TokenExpiredException('No token found');
+        }
+        
+        if ($token->expires_at && $token->expires_at->isPast()) {
+            $token->delete();
+            throw new TokenExpiredException();
+        }
+        
+        return response()->json([
+            'status' => 200,
+            'message' => 'Token is valid',
+            'expires_at' => $token->expires_at->toISOString(),
+            'remaining_time' => $token->expires_at->diffForHumans()
         ], 200);
     }
 

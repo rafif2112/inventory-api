@@ -43,6 +43,19 @@ class UnitItemController extends Controller
         ], 200);
     }
 
+    public function listUnitItem(Request $request)
+    {
+        $user = Auth::user();
+        $search = $request->query('search');
+
+        $unitItems = $this->unitItemService->getListUnitItem($user, $search);
+
+        return response()->json([
+            'status' => 200,
+            'data' => UnitItemResource::collection($unitItems),
+        ], 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

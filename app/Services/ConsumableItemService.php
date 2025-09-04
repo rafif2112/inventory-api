@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ConsumableItem;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ConsumableItemService
@@ -27,6 +28,9 @@ class ConsumableItemService
             })
             ->when($user->role === 'superadmin' && in_array($sortMajor, ['asc', 'desc']), function ($q) use ($sortMajor) {
                 $q->orderBy('majors.name', $sortMajor);
+            })
+            ->when($user->role !== 'superadmin', function ($q) use ($user) {
+                $q->where('majors.id', $user->major_id);
             });
 
         return $query->get();
@@ -49,6 +53,9 @@ class ConsumableItemService
             })
             ->when($user->role === 'superadmin' && in_array($sortMajor, ['asc', 'desc']), function ($q) use ($sortMajor) {
                 $q->orderBy('majors.name', $sortMajor);
+            })
+            ->when($user->role !== 'superadmin', function ($q) use ($user) {
+                $q->where('majors.id', $user->major_id);
             });
 
         return $query->paginate($perPage);
@@ -60,12 +67,13 @@ class ConsumableItemService
     public function createConsumableItem(array $data)
     {
         try {
+            $user = Auth::user();
             $newItem = ConsumableItem::updateOrCreate(
                 ['name' => $data['name']],
                 [
                     'unit' => $data['unit'],
                     'quantity' => $data['quantity'],
-                    'major_id' => $data['major_id'],
+                    'major_id' => $data['major_id'] ?? $user->major_id,
                 ]
             );
 
