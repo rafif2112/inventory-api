@@ -74,14 +74,13 @@ class SubItemController extends Controller
             ->when($sortByMerk, fn($query) =>
                 $query->orderBy('sub_items.merk', $sortByMerk)
             )
+            ->when($user->role !== 'superadmin', fn($query) =>
+                $query->whereHas('major', fn($q) =>
+                    $q->where('id', $user->major_id)
+                )
+            )
             ->orderBy('sub_items.created_at', 'desc')
             ->paginate(10);
-
-        if ($user->role !== 'superadmin') {
-            $query->whereHas('major', function ($q) use ($user) {
-                $q->where('id', $user->major_id);
-            });
-        }
 
         $data = $query->map(function ($subItem) {
             $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
