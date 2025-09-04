@@ -63,9 +63,9 @@ class UnitItemService
                 $q->where('unit_items.code_unit', 'ILIKE', '%' . $search . '%');
             });
 
-        // if ($user->role != 'superadmin' && !empty($user->role)) {
-        //     $query->where('sub_items.major_id', $user->major_id);
-        // }
+        if ($user->role != 'superadmin' && !empty($user->role)) {
+            $query->where('sub_items.major_id', $user->major_id);
+        }
 
         return $query->get();
     }
