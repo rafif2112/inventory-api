@@ -64,7 +64,8 @@ class AdminUserController extends Controller
         ], 200);
     }
 
-    public function indexAverageBorrowing(){
+    public function indexAverageBorrowing()
+    {
         $data = $this->adminDashboardService->getAverageBorrowing();
 
         return response()->json([
@@ -90,7 +91,7 @@ class AdminUserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function index(Request $request)
+    public function countItem(Request $request)
     {
         // Hitung total semua data
         $totalUnitItems = UnitItem::count();

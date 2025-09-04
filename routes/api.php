@@ -67,7 +67,7 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
         Route::get('/teacher/data', [TeacherController::class, 'getTeachersData']);
         Route::delete('/teacher/reset', [TeacherController::class, 'resetData']);
         Route::apiResource('/teacher', TeacherController::class)->only(['update', 'destroy']);
-        
+
         Route::post('/student/import', [StudentController::class, 'import']);
         Route::get('/student/data', [StudentController::class, 'getStudentData']);
         Route::delete('/student/reset', [StudentController::class, 'resetData']);
@@ -75,7 +75,7 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
     });
 
     Route::apiResource('/teacher', TeacherController::class)->only(['index', 'show']);
-    
+
     Route::apiResource('/student', StudentController::class)->only(['index', 'show']);
 
     Route::post('/unit-loan/check', [UnitLoanController::class, 'getLoan']);
@@ -104,9 +104,11 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
         });
 
         Route::prefix('/admin-user')->controller(AdminUserController::class)->group(function () {
+            Route::get('/items-loans-history', 'getItemsLoansHistory');
             Route::get('/latest-activity', 'latestActivity');
-            Route::get('/item-count', 'itemCount');
-            Route::get('/item-count-percentage', 'indexAverageBorrowing');
+            Route::get('/item-percentage', 'indexAverageBorrowing');
+            Route::get('/item-top', 'itemBorrowPercentage');
+            Route::get('/count-item', 'countItem');
         });
 
         Route::prefix('/superadmin')->middleware('isSuperadmin')->controller(SuperadminController::class)->group(function () {
