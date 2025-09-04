@@ -57,6 +57,7 @@ class SubItemController extends Controller
     }
 
     public function SubItemPaginate(Request $request){
+        $user = $request->user();
         $search = $request->query('search', '');
         $sortByMajor = $request->query('sort_major');
         $sortByMerk = $request->query('sort_brand');
@@ -75,6 +76,12 @@ class SubItemController extends Controller
             )
             ->orderBy('sub_items.created_at', 'desc')
             ->paginate(10);
+
+        if ($user->role !== 'superadmin') {
+            $query->whereHas('major', function ($q) use ($user) {
+                $q->where('id', $user->major_id);
+            });
+        }
 
         $data = $query->map(function ($subItem) {
             $subItem->setAttribute('stock', UnitItem::where('sub_item_id', $subItem->id)->count());
