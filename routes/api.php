@@ -106,7 +106,9 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
         Route::prefix('/admin-user')->controller(AdminUserController::class)->group(function () {
             Route::get('/latest-activity', 'latestActivity');
             Route::get('/item-count', 'itemCount');
-            Route::get('/item-count-percentage', 'indexAverageBorrowing');
+            Route::get('/most-borrowed-percentage', 'indexAverageBorrowing');
+            Route::get('/items-loans-history', 'getItemsLoansHistory');
+            Route::get('/card', 'index');
         });
 
         Route::prefix('/superadmin')->middleware('isSuperadmin')->controller(SuperadminController::class)->group(function () {
