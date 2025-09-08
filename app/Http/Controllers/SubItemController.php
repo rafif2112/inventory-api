@@ -57,6 +57,7 @@ class SubItemController extends Controller
     }
 
     public function SubItemPaginate(Request $request){
+        $user = $request->user();
         $search = $request->query('search', '');
         $sortByMajor = $request->query('sort_major');
         $sortByMerk = $request->query('sort_brand');
@@ -72,6 +73,11 @@ class SubItemController extends Controller
             )
             ->when($sortByMerk, fn($query) =>
                 $query->orderBy('sub_items.merk', $sortByMerk)
+            )
+            ->when($user->role !== 'superadmin', fn($query) =>
+                $query->whereHas('major', fn($q) =>
+                    $q->where('id', $user->major_id)
+                )
             )
             ->orderBy('sub_items.created_at', 'desc')
             ->paginate(10);

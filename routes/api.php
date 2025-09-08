@@ -109,6 +109,10 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
             Route::get('/item-percentage', 'indexAverageBorrowing');
             Route::get('/item-top', 'itemBorrowPercentage');
             Route::get('/count-item', 'countItem');
+            Route::get('/item-count', 'itemCount');
+            Route::get('/most-borrowed-percentage', 'indexAverageBorrowing');
+            Route::get('/items-loans-history', 'getItemsLoansHistory');
+            Route::get('/card', 'index');
         });
 
         Route::prefix('/superadmin')->middleware('isSuperadmin')->controller(SuperadminController::class)->group(function () {

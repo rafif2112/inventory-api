@@ -40,7 +40,6 @@ class SuperadminController extends Controller
 
         return response()->json([
             'status' => 200,
-            'role' => Auth::user()->role,
             'data' => ItemsLoansHistoryResource::collection($data)
         ]);
     }
