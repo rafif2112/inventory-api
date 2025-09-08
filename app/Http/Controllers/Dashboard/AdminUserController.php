@@ -30,16 +30,19 @@ class AdminUserController extends Controller
 
     public function getItemsLoansHistory()
     {
-        $items = UnitItem::with(['subItem' => function ($q) {
-            $q->latest()->limit(1);
-        }])
+        $data = UnitLoan::with(['unitItem', 'unitItem.subItem', 'unitItem.subItem', 'unitItem.subItem.item'])
             ->latest()
-            ->take(5)
+            ->when(Auth::user()->major_id, function ($query) {
+                $query->whereHas('unitItem.subItem', function ($q) {
+                    $q->where('major_id', Auth::user()->major_id);
+                });
+            })
+            ->take(3)
             ->get();
 
         return response()->json([
             'status' => 200,
-            'data' => ItemsLoansHistoryResource::collection($items)
+            'data' => ItemsLoansHistoryResource::collection($data)
         ]);
     }
 
@@ -64,7 +67,8 @@ class AdminUserController extends Controller
         ], 200);
     }
 
-    public function indexAverageBorrowing(){
+    public function indexAverageBorrowing()
+    {
         $data = $this->adminDashboardService->getAverageBorrowing();
 
         return response()->json([
