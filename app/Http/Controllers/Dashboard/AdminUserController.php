@@ -96,9 +96,13 @@ class AdminUserController extends Controller
      */
     public function index(Request $request)
     {
-        // Hitung total semua data
-        $totalUnitItems = UnitItem::count();
-        $totalConsumables = ConsumableItem::count();
+        $totalUnitItems = UnitItem::with('subItem')
+            ->whereHas('subItem', function ($q) {
+                $q->where('major_id', auth()->user()->major_id);
+            })
+            ->count();
+        $totalConsumables = ConsumableItem::where('major_id', auth()->user()->major_id)
+            ->count();
         $total = $totalUnitItems + $totalConsumables;
 
 

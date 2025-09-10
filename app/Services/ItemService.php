@@ -8,7 +8,7 @@ class ItemService
 {
     public function getAllItems($search = null)
     {
-        $data = Item::select('*')->latest();
+        $data = Item::select('*')->orderBy('name', 'asc');
 
         if ($search) {
             $data->where('name', 'ILIKE', "%{$search}%");
@@ -21,7 +21,7 @@ class ItemService
 
     public function getItemPaginate($search = null)
     {
-        $data = Item::select('*')->latest();
+        $data = Item::select('*')->orderBy('name', 'asc');
 
         if ($search) {
             $data->where('name', 'ILIKE', "%{$search}%");

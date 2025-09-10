@@ -42,9 +42,9 @@ class UnitItemService
                 ->orWhere('items.name', 'ILIKE', '%' . $search . '%');
         }
 
-        if ($user->role != 'superadmin' && !empty($user->role)) {
-            $query->where('sub_items.major_id', $user->major_id);
-        }
+        // if ($user->role != 'superadmin' && !empty($user->role)) {
+        //     $query->where('sub_items.major_id', $user->major_id);
+        // }
 
         return $query->paginate(10);
     }
