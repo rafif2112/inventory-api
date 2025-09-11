@@ -23,7 +23,7 @@ class StoreValidate extends FormRequest
     {
         return [
             'name' => 'required|string|unique:majors,name',
-            'icon' => 'nullable|string',
+            'icon' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'color' => 'required|string',
         ];
     }

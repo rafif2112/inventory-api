@@ -19,64 +19,44 @@ class MajorService
 
     public function storeMajor(Request $request, array $data)
     {
+        $major = Major::create($data);
 
-        if ($request->icon) {
-            $icon = $request->icon;
-            if (preg_match('/^data:image\/(\w+);base64,/', $icon, $type)) {
-                $format = strtolower($type[1]); // jpg, png, jpeg, dll.
-
-                if (!in_array($format, ['jpg', 'jpeg', 'png', 'webp'])) {
-                    return response()->json([
-                        'status' => 400,
-                        'message' => 'Invalid image format',
-                    ], 400);
-                }
-                $icon = preg_replace('/^data:image\/\w+;base64,/', '', $icon);
-                $icon = str_replace(' ', '+', $icon);
-                $filename = 'majors/' . time() . '-' . Str::slug($request->name) . '.' . $format;
-                Storage::disk('local')->put($filename, base64_decode($icon));
-                $data['icon'] = $filename;
-            } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Invalid base64 string',
-                ], 400);
+        if ($request && $request->icon) {
+            if ($major->icon) {
+                Storage::disk('local')->delete($major->icon);
             }
-        }
 
-        Major::create($data);
+            $file = $request->icon;
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = 'majors';
+
+            Storage::disk('public')->makeDirectory($path);
+            $relativePath = $path . '/' . $filename;
+            Storage::disk('public')->put($relativePath, file_get_contents($file));
+
+            $major->icon = $relativePath;
+            $major->save();
+        }
     }
 
     public function updateMajor($major, $validated, Request $request)
     {
         $updateData = [];
 
-        if ($request->icon) {
-            $icon = $request->icon;
-            if (preg_match('/^data:image\/(\w+);base64,/', $icon, $type)) {
-                $format = strtolower($type[1]);
-                if (!in_array($format, ['jpg', 'jpeg', 'png', 'webp'])) {
-                    return response()->json([
-                        'status' => 400,
-                        'message' => 'Invalid image format',
-                    ], 400);
-                }
-
-                $icon = preg_replace('/^data:image\/\w+;base64,/', '', $icon);
-                $icon = str_replace(' ', '+', $icon);
-                $filename = 'majors/' . time() . '-' . Str::slug($request->name) . '.' . $format;
-                if ($major->icon) {
-                    Storage::disk('local')->delete($major->icon);
-                }
-
-                Storage::disk('local')->put($filename, base64_decode($icon));
-                $updateData['icon'] = $filename;
-            } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Invalid base64 string',
-                ], 400);
+        if ($request && $request->icon) {
+            if ($major->icon) {
+            Storage::disk('public')->delete($major->icon);
             }
+
+            $file = $request->icon;
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = 'majors';
+
+            Storage::disk('public')->makeDirectory($path);
+            $relativePath = $path . '/' . $filename;
+            Storage::disk('public')->put($relativePath, file_get_contents($file));
+
+            $updateData['icon'] = $relativePath;
         }
 
         $major->whereId($major->id)->update(array_merge($validated, $updateData));

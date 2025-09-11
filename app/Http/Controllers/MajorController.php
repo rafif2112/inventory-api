@@ -56,7 +56,6 @@ class MajorController extends Controller
             $this->majorService->storeMajor($request, $data);
 
             DB::commit();
-
             return response()->json([
                 'status' => 201,
                 'message' => 'Major created successfully',

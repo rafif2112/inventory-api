@@ -17,7 +17,7 @@ class AuthController extends Controller
     public function index()
     {
         $userId = Auth::id();
-        $user = Auth::user();
+        $user = Auth::user()->load('major');
 
         $this->checkTokenExpiration($user);
 
