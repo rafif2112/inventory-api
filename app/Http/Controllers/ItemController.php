@@ -50,7 +50,6 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
@@ -75,7 +74,7 @@ class ItemController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => 500,
-                'message' => 'Failed to create item',
+                'message' => 'Failed to create item ' . $th->getMessage(),
             ], 500);
         }
     }

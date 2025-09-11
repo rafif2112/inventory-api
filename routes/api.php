@@ -43,10 +43,14 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
 
     Route::get('/user/data', [UserController::class, 'getUsersData']);
     Route::get('/user', [AuthController::class, 'index']);
-    Route::apiResource('/user', UserController::class)->except('index');
 
     Route::get('/item/paginate', [ItemController::class, 'itemPaginate']);
-    Route::apiResource('/item', ItemController::class);
+    Route::apiResource('/item', ItemController::class)->only('show', 'index');
+
+    Route::middleware('isSuperadmin')->group(function () {
+        Route::apiResource('/item', ItemController::class)->except('show', 'index');
+        Route::apiResource('/user', UserController::class)->except('index');
+    });
 
     Route::get('/subitem/paginate', [SubItemController::class, 'SubItemPaginate']);
     Route::apiResource('/subitem', SubItemController::class);

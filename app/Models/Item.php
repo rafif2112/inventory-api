@@ -12,6 +12,7 @@ class Item extends Model
 
     protected $fillable = [
         'name',
+        'code_item',
     ];
 
     public function subItems()

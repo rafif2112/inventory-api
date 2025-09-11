@@ -14,7 +14,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class UnitItemService
 {
 
-    public function getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor)
+    public function getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor, $subitemId = null)
     {
         $query = UnitItem::query()
             ->select('unit_items.*')
@@ -36,15 +36,19 @@ class UnitItemService
             })
             ->latest();
 
+        if ($subitemId) {
+            $query->where('unit_items.sub_item_id', $subitemId);
+        }
+
         if ($search) {
             $query->where('unit_items.code_unit', 'ILIKE', '%' . $search . '%')
                 ->orWhere('sub_items.merk', 'ILIKE', '%' . $search . '%')
                 ->orWhere('items.name', 'ILIKE', '%' . $search . '%');
         }
 
-        // if ($user->role != 'superadmin' && !empty($user->role)) {
-        //     $query->where('sub_items.major_id', $user->major_id);
-        // }
+        if ($user->role != 'superadmin' && !empty($user->role)) {
+            $query->where('sub_items.major_id', $user->major_id);
+        }
 
         return $query->paginate(10);
     }

@@ -34,7 +34,9 @@ class UnitItemController extends Controller
         $sortCondition = $request->query('sort_condition');
         $sortMajor = $request->query('sort_major');
 
-        $unitItems = $this->unitItemService->getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor);
+        $subitemId = $request->query('sub_item_id');
+
+        $unitItems = $this->unitItemService->getAllUnitItems($user, $search, $sortDate, $sortType, $sortCondition, $sortMajor, $subitemId);
 
         return response()->json([
             'status' => 200,
