@@ -34,7 +34,7 @@ class MajorService
             $relativePath = $path . '/' . $filename;
             Storage::disk('public')->put($relativePath, file_get_contents($file));
 
-            $major->icon = $relativePath;
+            $major->icon = $filename;
             $major->save();
         }
     }
@@ -56,7 +56,7 @@ class MajorService
             $relativePath = $path . '/' . $filename;
             Storage::disk('public')->put($relativePath, file_get_contents($file));
 
-            $updateData['icon'] = $relativePath;
+            $updateData['icon'] = $filename;
         }
 
         $major->whereId($major->id)->update(array_merge($validated, $updateData));

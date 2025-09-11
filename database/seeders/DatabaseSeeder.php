@@ -16,61 +16,42 @@ class DatabaseSeeder extends Seeder
     {
         Major::create([
             'name' => 'PPLG',
+            'icon' => 'pplg.png',
             'color' => '#A2C5FF',
         ]);
         Major::create([
             'name' => 'DKV',
+            'icon' => 'dkv.jpg',
             'color' => '#FFD6A1',
         ]);
         Major::create([
             'name' => 'TJKT',
+            'icon' => 'tjkt.jpg',
             'color' => '#FFF3A4',
         ]);
         Major::create([
             'name' => 'MPLB',
+            'icon' => 'mplb.png',
             'color' => '#FF484B',
         ]);
         Major::create([
             'name' => 'KLN',
+            'icon' => 'kln.jpg',
             'color' => '#D967CA',
         ]);
         Major::create([
             'name' => 'HTL',
+            'icon' => 'htl.jpg',
             'color' => '#42A531',
         ]);
         Major::create([
             'name' => 'PMN',
+            'icon' => 'pmn.jpg',
             'color' => '#877E31',
         ]);
 
-        User::create([
-            'name' => 'Super Admin',
-            'username' => 'superadmin',
-            'role' => 'superadmin',
-            'password' => bcrypt('password'),
-            'major_id' => 1
-        ]);
-
-        User::create([
-            'name' => 'Kaprog PPLG',
-            'username' => 'kaprogpplg',
-            'role' => 'admin',
-            'password' => bcrypt('password'),
-            'major_id' => 1
-        ]);
-
-        User::create([
-            'name' => 'Kepala Lab PPLG',
-            'username' => 'labpplg',
-            'role' => 'user',
-            'password' => bcrypt('password'),
-            'major_id' => 1
-        ]);
-
         $this->call([
-            ItemSeeder::class,
-            SubItemSeeder::class,
-            UnitItemSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

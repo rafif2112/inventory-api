@@ -19,6 +19,7 @@ class MajorResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'icon' => $this->icon,
+            'icon_url' => url('storage/majors/' . $this->icon),
             'color' => $this->color,
         ];
 
