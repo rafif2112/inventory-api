@@ -52,8 +52,8 @@ class TeacherController extends Controller
     {
         $validatedData = $request->validate([
             'nip' => 'required|unique:teachers,nip',
-            'nama' => 'required|string|max:255',
-            'no_telp' => 'required|string|max:20',
+            'name' => 'required|string|max:255',
+            'telephone' => 'required|string|max:20',
         ]);
 
         $teacher = $this->teacherService->createTeacher($validatedData);
@@ -99,8 +99,8 @@ class TeacherController extends Controller
     {
         $validatedData = $request->validate([
             'nip' => 'required|unique:teachers,nip,' . $teacher->id,
-            'nama' => 'required|string|max:255',
-            'no_telp' => 'required|string|max:20',
+            'name' => 'required|string|max:255',
+            'telephone' => 'required|string|max:20',
         ]);
 
         $updatedTeacher = $this->teacherService->updateTeacher($teacher, $validatedData);

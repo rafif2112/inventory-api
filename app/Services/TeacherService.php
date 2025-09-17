@@ -160,8 +160,8 @@ class TeacherService
     {
         $teacher = Teacher::create([
             'nip' => $data['nip'],
-            'name' => $data['nama'],
-            'telephone' => $data['no_telp'],
+            'name' => $data['name'],
+            'telephone' => $data['telephone'],
         ]);
 
         $this->clearTeacherCache();
@@ -173,9 +173,9 @@ class TeacherService
     {
         if ($teacher) {
             $teacher->update([
-                'nip' => $data['nip'],
-                'name' => $data['nama'],
-                'telephone' => $data['no_telp'],
+                'nip' => $data['nip'] ?? $teacher->nip,
+                'name' => $data['name'] ?? $teacher->name,
+                'telephone' => $data['telephone'] ?? $teacher->telephone,
             ]);
 
             $this->clearTeacherCache();

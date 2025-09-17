@@ -8,10 +8,19 @@ class ItemService
 {
     public function getAllItems($search = null)
     {
+        $tabs = request()->query('tabs', 'true');
         $data = Item::select('*')->orderBy('name', 'asc');
 
         if ($search) {
             $data->where('name', 'ILIKE', "%{$search}%");
+        }
+
+        if ($tabs === 'true') {
+            $data->whereHas('subItems', function ($query) {
+            $query->whereNotNull('item_id');
+            })->whereHas('subItems.unitItems', function ($unitQuery) {
+            $unitQuery->where('status', false);
+            });
         }
 
         $data = $data->get();

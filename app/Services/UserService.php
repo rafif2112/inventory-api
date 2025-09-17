@@ -23,7 +23,7 @@ class UserService
             ->when($search, function ($query) use ($search) {
                 return $query->where('users.name', 'ilike', "%{$search}%");
             })
-            ->orderBy('majors.id', $sortDir)
+            ->orderBy('majors.name', $sortDir)
             ->paginate($perPage);
     }
 

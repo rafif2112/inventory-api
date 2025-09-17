@@ -70,12 +70,12 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
         Route::post('/teacher/import', [TeacherController::class, 'import']);
         Route::get('/teacher/data', [TeacherController::class, 'getTeachersData']);
         Route::delete('/teacher/reset', [TeacherController::class, 'resetData']);
-        Route::apiResource('/teacher', TeacherController::class)->only(['update', 'destroy']);
+        Route::apiResource('/teacher', TeacherController::class)->except(['index', 'show']);
         
         Route::post('/student/import', [StudentController::class, 'import']);
         Route::get('/student/data', [StudentController::class, 'getStudentData']);
         Route::delete('/student/reset', [StudentController::class, 'resetData']);
-        Route::apiResource('/student', StudentController::class)->only(['update', 'destroy']);
+        Route::apiResource('/student', StudentController::class)->except(['index', 'show']);
     });
 
     Route::apiResource('/teacher', TeacherController::class)->only(['index', 'show']);
