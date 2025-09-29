@@ -14,7 +14,6 @@ class DashboardService
             ->join('sub_items', 'sub_items.item_id', '=', 'items.id')
             ->join('unit_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
             ->join('unit_loans', 'unit_loans.unit_item_id', '=', 'unit_items.id')
-            ->where('unit_loans.status', 1)
             ->groupBy('items.id', 'items.name')
             ->limit(5)
             ->orderByDesc('total_borrowed')
@@ -27,7 +26,6 @@ class DashboardService
             ->join('sub_items', 'sub_items.item_id', '=', 'items.id')
             ->join('unit_items', 'unit_items.sub_item_id', '=', 'sub_items.id')
             ->join('unit_loans', 'unit_loans.unit_item_id', '=', 'unit_items.id')
-            ->where('unit_loans.status', 1)
             ->groupBy('items.id', 'items.name')
             ->orderByDesc('total_borrowed')
             ->get();

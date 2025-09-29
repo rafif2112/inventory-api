@@ -155,8 +155,7 @@ class AdminUserController extends Controller
 
             $userMajorId = auth()->user()->major_id;
 
-            $loans = UnitLoan::where('status', 1)
-                ->whereBetween('borrowed_at', [$startDate, $endDate])
+            $loans = UnitLoan::whereBetween('borrowed_at', [$startDate, $endDate])
                 ->whereHas('unitItem.subItem', function ($q) use ($userMajorId) {
                     $q->where('major_id', $userMajorId);
                 })
