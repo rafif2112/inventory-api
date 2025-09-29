@@ -111,6 +111,7 @@ Route::middleware(['auth:api', 'token.check'])->group(function () {
             Route::get('/latest-activity', 'latestActivity');
             Route::get('/item-count', 'itemCount');
             Route::get('/most-borrowed-percentage', 'indexAverageBorrowing');
+            Route::get('/latest-items', 'latestItems');
             Route::get('/items-loans-history', 'getItemsLoansHistory');
             Route::get('/card', 'index');
         });

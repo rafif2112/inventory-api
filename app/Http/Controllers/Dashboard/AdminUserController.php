@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Admin\ItemCountResource;
 use App\Http\Resources\Admin\ItemBorrowPercentage;
+use App\Http\Resources\Admin\LatestItem;
 use App\Services\AdminUser\AdminDashboardService;
 use App\Models\SubItem;
 use App\Models\UnitItem;
@@ -65,6 +66,24 @@ class AdminUserController extends Controller
             'status' => 200,
             'data' => $data
         ], 200);
+    }
+
+    public function latestItems(Request $request)
+    {
+        $data = UnitItem::with(['subItem', 'subItem.item'])
+            ->latest()
+            ->when(Auth::user()->major_id, function ($query) {
+                $query->whereHas('subItem', function ($q) {
+                    $q->where('major_id', Auth::user()->major_id);
+                });
+            })
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'status' => 200,
+            'data' => LatestItem::collection($data)
+        ]);
     }
 
     public function indexAverageBorrowing()
