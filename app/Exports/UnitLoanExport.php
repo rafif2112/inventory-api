@@ -106,7 +106,7 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
             $unitLoan->borrowed_by ?? 'N/A',
             $unitLoan->student ? $unitLoan->student->name : ($unitLoan->teacher ? $unitLoan->teacher->name : 'N/A'),
             $unitLoan->student ? $unitLoan->student->rayon : 'N/A',
-            $unitLoan->student ? $unitLoan->student->major->name : 'N/A',
+            $unitLoan->student && $unitLoan->student->major ? $unitLoan->student->major->name : 'N/A',
             $unitLoan->borrowed_at ? \Carbon\Carbon::parse($unitLoan->borrowed_at)->format('d M Y H:i') : 'N/A',
             $unitLoan->returned_at ? \Carbon\Carbon::parse($unitLoan->returned_at)->format('d M Y H:i') : 'Not Returned',
             $unitLoan->purpose ?? 'N/A',
