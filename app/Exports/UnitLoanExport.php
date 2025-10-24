@@ -84,13 +84,14 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
             'Brand',
             'Lender Name',
             'Borrower Name',
+            'Rayon',
+            'Major',
             'Borrowed Date',
             'Returned Date',
             'Purpose',
             'Room',
             'Status',
             'Guarantee',
-            'Major',
         ];
     }
 
@@ -104,13 +105,14 @@ class UnitLoanExport implements FromQuery, WithHeadings, WithMapping, WithStyles
             $unitLoan->unitItem->subItem->merk ?? 'N/A',
             $unitLoan->borrowed_by ?? 'N/A',
             $unitLoan->student ? $unitLoan->student->name : ($unitLoan->teacher ? $unitLoan->teacher->name : 'N/A'),
+            $unitLoan->student ? $unitLoan->student->rayon : ($unitLoan->teacher ? 'N/A' : 'N/A'),
+            $unitLoan->student ? $unitLoan->student->major->name : ($unitLoan->teacher ? 'N/A' : 'N/A'),
             $unitLoan->borrowed_at ? \Carbon\Carbon::parse($unitLoan->borrowed_at)->format('d M Y H:i') : 'N/A',
             $unitLoan->returned_at ? \Carbon\Carbon::parse($unitLoan->returned_at)->format('d M Y H:i') : 'Not Returned',
             $unitLoan->purpose ?? 'N/A',
             $unitLoan->room ?? 'N/A',
             $unitLoan->status ? 'Borrowed' : 'Returned',
             $unitLoan->guarantee ?? 'N/A',
-            $unitLoan->unitItem->subItem->major->name ?? 'N/A',
         ];
     }
 
